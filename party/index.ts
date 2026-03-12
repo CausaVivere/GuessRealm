@@ -1,6 +1,9 @@
 import type * as Party from "partykit/server";
 import type { ClientMessage, ServerMessage, Player, RoomState } from "./types";
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+const INTERNAL_SECRET = process.env.INTERNAL_SECRET ?? "";
+
 // Maps connectionId → stable playerId for disconnect handling
 type ConnectionMap = Map<string, string>;
 
@@ -10,6 +13,7 @@ export default class GameRoom implements Party.Server {
     players: [],
     hostId: null,
     status: "waiting",
+    set: null,
   };
 
   // Track which connection belongs to which player
@@ -39,6 +43,9 @@ export default class GameRoom implements Party.Server {
         break;
       case "start-game":
         this.handleStartGame(sender);
+        break;
+      case "selected-set":
+        this.handleSelectSet(sender, msg.setId);
         break;
       case "guess":
         // TODO: handle guess logic
@@ -127,6 +134,42 @@ export default class GameRoom implements Party.Server {
 
     this.state.status = "playing";
     this.broadcast({ type: "room-state", state: this.state });
+  }
+
+  private async handleSelectSet(conn: Party.Connection, setId: string) {
+    const playerId = this.connections.get(conn.id);
+    if (!playerId) return;
+
+    // Only the host can select the set
+    if (playerId !== this.state.hostId) {
+      this.send(conn, {
+        type: "error",
+        message: "Only the host can select the character set",
+      });
+      return;
+    }
+
+    try {
+      const res = await fetch(
+        `${APP_URL}/api/internal/set/${encodeURIComponent(setId)}`,
+        { headers: { "x-internal-secret": INTERNAL_SECRET } },
+      );
+
+      if (!res.ok) {
+        this.send(conn, { type: "error", message: "Character set not found" });
+        return;
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const set = await res.json();
+      this.state.set = set;
+      this.broadcast({ type: "room-state", state: this.state });
+    } catch {
+      this.send(conn, {
+        type: "error",
+        message: "Failed to load character set",
+      });
+    }
   }
 
   // ─── Helpers ─────────────────────────────────────────────────

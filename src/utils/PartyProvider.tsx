@@ -18,6 +18,7 @@ import type {
 import { useLocalStorage } from "./hooks";
 import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { set } from "zod";
 
 const PARTYKIT_HOST = process.env.NEXT_PUBLIC_PARTYKIT_HOST ?? "localhost:1999";
 
@@ -69,6 +70,7 @@ type PartyContextValue = {
   roomId: string | null;
   playerId: string;
   playerName: string;
+  isHost: boolean;
   connected: boolean;
   error: string | null;
 
@@ -79,6 +81,7 @@ type PartyContextValue = {
   leaveRoom: () => void;
   send: (msg: ClientMessage) => void;
   startGame: () => void;
+  selectSet: (setId: string) => void;
 };
 
 const PartyContext = createContext<PartyContextValue | null>(null);
@@ -91,6 +94,7 @@ export function PartyProvider({ children }: { children: ReactNode }) {
   const [roomState, setRoomState] = useState<RoomState | null>(null);
   const [connected, setConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isHost, setIsHost] = useState(false);
   const socketRef = useRef<PartySocket | null>(null);
   const playerNameRef = useRef(playerName);
   const hasRestoredRef = useRef(false);
@@ -190,6 +194,7 @@ export function PartyProvider({ children }: { children: ReactNode }) {
     if (roomState?.status === "playing" && pathname !== "/play") {
       router.push("/play");
     }
+    setIsHost(roomState?.hostId === playerId);
     console.log("Room state changed:", roomState, pathname);
   }, [roomState]);
 
@@ -227,6 +232,15 @@ export function PartyProvider({ children }: { children: ReactNode }) {
     );
   }, []);
 
+  const selectSet = useCallback((setId: string) => {
+    socketRef.current?.send(
+      JSON.stringify({
+        type: "selected-set",
+        setId,
+      } satisfies ClientMessage),
+    );
+  }, []);
+
   const send = useCallback((msg: ClientMessage) => {
     socketRef.current?.send(JSON.stringify(msg));
   }, []);
@@ -240,12 +254,14 @@ export function PartyProvider({ children }: { children: ReactNode }) {
         playerName,
         connected,
         error,
+        isHost,
         setPlayerName,
         createRoom,
         joinRoom,
         leaveRoom,
         send,
         startGame,
+        selectSet,
       }}
     >
       {children}

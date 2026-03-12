@@ -1,17 +1,23 @@
 import { Loader2 } from "lucide-react";
+import { cn } from "~/lib/utils";
 
 export default function Loading({
   message,
   fullScreen,
+  className,
   ...props
 }: {
   message: string;
   fullScreen?: boolean;
-  props?: React.HTMLAttributes<HTMLDivElement>;
-}) {
+  className?: string;
+} & React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={`flex flex-col items-center justify-center gap-5 ${fullScreen ? "min-h-screen w-full" : ""}`}
+      className={cn(
+        "flex flex-col items-center justify-center gap-5",
+        fullScreen ? "min-h-screen w-full" : "",
+        className,
+      )}
       {...props}
     >
       <Loader2 className="animate-spin" />

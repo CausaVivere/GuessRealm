@@ -1,9 +1,12 @@
 // Shared types between party server and client
 
+import type { AnimeGameSet } from "~/server/api/utils/jikan";
+
 // Messages sent FROM clients TO the server
 export type ClientMessage =
   | { type: "join"; playerName: string; playerId: string }
   | { type: "start-game" }
+  | { type: "selected-set"; setId: string }
   | { type: "guess"; characterId: number };
 
 // Messages sent FROM the server TO clients
@@ -26,4 +29,5 @@ export type RoomState = {
   players: Player[];
   hostId: string | null; // stable player ID of the host
   status: "waiting" | "playing" | "finished";
+  set: AnimeGameSet | null;
 };

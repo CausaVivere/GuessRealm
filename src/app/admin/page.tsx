@@ -24,7 +24,7 @@ import { cn } from "~/lib/utils";
 import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { useSessionStorage } from "~/utils/hooks";
 import type { AnimeCharacter } from "../../../generated/prisma/client";
-import type { AnimeObject } from "~/server/api/routers/sets";
+import type { AnimeObject } from "~/server/api/utils/jikan";
 
 export default function AnimePage() {
   const [step, setStep] = useState<"selectAnime" | "selectCharacters">(
