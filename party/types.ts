@@ -2,7 +2,7 @@
 
 // Messages sent FROM clients TO the server
 export type ClientMessage =
-  | { type: "join"; playerName: string }
+  | { type: "join"; playerName: string; playerId: string }
   | { type: "start-game" }
   | { type: "guess"; characterId: number };
 
@@ -11,16 +11,19 @@ export type ServerMessage =
   | { type: "room-state"; state: RoomState }
   | { type: "player-joined"; player: Player }
   | { type: "player-left"; playerId: string }
+  | { type: "game-started" }
   | { type: "error"; message: string };
 
 export type Player = {
-  id: string;
+  id: string; // stable player ID (generated client-side, persisted in sessionStorage)
+  connectionId: string; // current WebSocket connection ID (changes on reconnect)
   name: string;
   score: number;
+  connected: boolean;
 };
 
 export type RoomState = {
   players: Player[];
-  hostId: string | null;
+  hostId: string | null; // stable player ID of the host
   status: "waiting" | "playing" | "finished";
 };

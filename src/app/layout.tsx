@@ -6,6 +6,7 @@ import { Geist } from "next/font/google";
 import { TRPCReactProvider } from "~/trpc/react";
 import { ThemeProvider } from "~/components/ui/themeProvider";
 import { Toaster } from "~/components/ui/sonner";
+import { PartyProvider } from "~/utils/PartyProvider";
 
 export const metadata: Metadata = {
   title: "Create T3 App",
@@ -32,7 +33,7 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             <Toaster />
-            {children}
+            <PartyProvider>{children}</PartyProvider>
           </ThemeProvider>
         </TRPCReactProvider>
       </body>

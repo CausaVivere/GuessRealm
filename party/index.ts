@@ -1,6 +1,9 @@
 import type * as Party from "partykit/server";
 import type { ClientMessage, ServerMessage, Player, RoomState } from "./types";
 
+// Maps connectionId → stable playerId for disconnect handling
+type ConnectionMap = Map<string, string>;
+
 // ─── Server ──────────────────────────────────────────────────────
 export default class GameRoom implements Party.Server {
   state: RoomState = {
@@ -9,11 +12,15 @@ export default class GameRoom implements Party.Server {
     status: "waiting",
   };
 
+  // Track which connection belongs to which player
+  connections: ConnectionMap = new Map();
+
   constructor(readonly room: Party.Room) {}
 
   // -- A player connects via WebSocket --
-  onConnect(conn: Party.Connection, ctx: Party.ConnectionContext) {
-    // Send them the current room state immediately
+  onConnect(conn: Party.Connection) {
+    // Don't assign host here — wait for the "join" message
+    // which carries the stable playerId
     this.send(conn, { type: "room-state", state: this.state });
   }
 
@@ -28,7 +35,7 @@ export default class GameRoom implements Party.Server {
 
     switch (msg.type) {
       case "join":
-        this.handleJoin(sender, msg.playerName);
+        this.handleJoin(sender, msg.playerId, msg.playerName);
         break;
       case "start-game":
         this.handleStartGame(sender);
@@ -41,45 +48,67 @@ export default class GameRoom implements Party.Server {
 
   // -- A player disconnects --
   onClose(conn: Party.Connection) {
-    const player = this.state.players.find((p) => p.id === conn.id);
+    const playerId = this.connections.get(conn.id);
+    if (!playerId) return;
+
+    this.connections.delete(conn.id);
+
+    const player = this.state.players.find((p) => p.id === playerId);
     if (!player) return;
 
-    this.state.players = this.state.players.filter((p) => p.id !== conn.id);
+    // Mark as disconnected instead of removing — allows reconnection
+    player.connected = false;
+    player.connectionId = "";
 
-    // If the host left, assign a new host
-    if (this.state.hostId === conn.id) {
-      this.state.hostId = this.state.players[0]?.id ?? null;
-    }
-
-    this.broadcast({ type: "player-left", playerId: conn.id });
+    this.broadcast({ type: "room-state", state: this.state });
   }
 
   // ─── Handlers ────────────────────────────────────────────────
-  private handleJoin(conn: Party.Connection, name: string) {
-    // Don't allow joining if game already started
+  private handleJoin(conn: Party.Connection, playerId: string, name: string) {
+    // Track this connection → player mapping
+    this.connections.set(conn.id, playerId);
+
+    // First player becomes host
+    if (!this.state.hostId) {
+      this.state.hostId = playerId;
+    }
+    // Check if this player already exists (reconnection)
+    const existing = this.state.players.find((p) => p.id === playerId);
+
+    if (existing) {
+      // Reconnection — update their connection ID and mark as connected
+      existing.connectionId = conn.id;
+      existing.connected = true;
+      existing.name = name; // allow name updates
+
+      this.broadcast({ type: "room-state", state: this.state });
+      return;
+    }
+
+    // New player — only allowed during waiting
     if (this.state.status !== "waiting") {
       this.send(conn, { type: "error", message: "Game already in progress" });
       return;
     }
 
-    // Don't allow duplicate joins
-    if (this.state.players.some((p) => p.id === conn.id)) return;
-
-    const player: Player = { id: conn.id, name, score: 0 };
+    const player: Player = {
+      id: playerId,
+      connectionId: conn.id,
+      name,
+      score: 0,
+      connected: true,
+    };
     this.state.players.push(player);
 
-    // First player becomes host
-    if (!this.state.hostId) {
-      this.state.hostId = conn.id;
-    }
-
-    // Tell everyone about the new player
-    this.broadcast({ type: "player-joined", player });
+    // Broadcast full state so all clients get hostId + players in sync
+    this.broadcast({ type: "room-state", state: this.state });
   }
 
   private handleStartGame(conn: Party.Connection) {
+    const playerId = this.connections.get(conn.id);
+
     // Only the host can start
-    if (conn.id !== this.state.hostId) {
+    if (playerId !== this.state.hostId) {
       this.send(conn, {
         type: "error",
         message: "Only the host can start the game",
@@ -87,10 +116,11 @@ export default class GameRoom implements Party.Server {
       return;
     }
 
-    if (this.state.players.length < 2) {
+    const connectedCount = this.state.players.filter((p) => p.connected).length;
+    if (connectedCount < 2) {
       this.send(conn, {
         type: "error",
-        message: "Need at least 2 players to start",
+        message: "Need at least 2 connected players to start",
       });
       return;
     }
