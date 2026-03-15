@@ -20,6 +20,7 @@ export const env = createEnv({
   client: {
     NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string(),
     NEXT_PUBLIC_PARTYKIT_HOST: z.string().optional(),
+    NEXT_PUBLIC_APP_URL: z.string().url(),
   },
 
   /**
@@ -36,6 +37,7 @@ export const env = createEnv({
     IGDB_SECRET: process.env.IGDB_SECRET,
     NEXT_PUBLIC_PARTYKIT_HOST: process.env.NEXT_PUBLIC_PARTYKIT_HOST,
     INTERNAL_SECRET: process.env.INTERNAL_SECRET,
+    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
