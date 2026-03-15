@@ -4,17 +4,15 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";
-import { ButtonGroup } from "~/components/ui/button-group";
-import { Input } from "~/components/ui/input";
 import Loading from "~/components/ui/loading";
 import { Separator } from "~/components/ui/separator";
 import { cn } from "~/lib/utils";
-import { api } from "~/trpc/react";
 import { useParty } from "~/utils/PartyProvider";
 import SetVisualizer from "../_components/setVisualiser";
-import type { AnimeGameSet } from "~/server/api/utils/jikan";
 import { Crown, Video } from "lucide-react";
 import Chat from "../_components/chat";
+import { motion, useReducedMotion } from "framer-motion";
+import SelectAnimeSet from "./_components/selectAnimeSet";
 
 export default function Lobby() {
   const [changingSet, setIsChangingSet] = useState(false);
@@ -29,6 +27,7 @@ export default function Lobby() {
     leaveRoom,
     startGame,
   } = useParty();
+  const prefersReducedMotion = useReducedMotion();
 
   const router = useRouter();
 
@@ -37,6 +36,12 @@ export default function Lobby() {
       router.push("/");
     }
   }, [connected, router]);
+
+  useEffect(() => {
+    if (roomState?.status === "playing") {
+      router.push("/play");
+    }
+  }, [roomState]);
 
   useEffect(() => {
     setIsChangingSet(false);
@@ -73,7 +78,7 @@ export default function Lobby() {
                 onClick={(e) => {
                   e.preventDefault();
                   if (!isHost) return;
-                  setIsChangingSet(true);
+                  setIsChangingSet(!changingSet);
                 }}
               >
                 {roomState.set.img ? (
@@ -140,18 +145,72 @@ export default function Lobby() {
               </div>
             ))}
           </div>
-          <div className="flex h-full w-full flex-col items-center">
+          <div className="flex h-full w-full flex-col items-center perspective-distant">
             {!roomState.set && !isHost ? (
               <Loading
                 message="Waiting for host to select character set..."
                 className="m-auto"
               />
-            ) : !roomState.set || changingSet ? (
-              <SelectAnimeSet />
             ) : (
-              <div className="flex h-full w-full justify-center gap-6">
-                <SetVisualizer className="" set={roomState.set} />
-              </div>
+              (() => {
+                const showSelector = !roomState.set || changingSet;
+
+                if (prefersReducedMotion) {
+                  return showSelector ? (
+                    <SelectAnimeSet
+                      changingSet={changingSet}
+                      setIsChangingSet={setIsChangingSet}
+                    />
+                  ) : (
+                    <div className="flex h-full w-full justify-center gap-6">
+                      {roomState.set ? (
+                        <SetVisualizer className="" set={roomState.set} />
+                      ) : null}
+                    </div>
+                  );
+                }
+
+                return (
+                  <motion.div
+                    className="relative h-200 w-full"
+                    style={{ transformStyle: "preserve-3d" }}
+                    animate={{ rotateY: showSelector ? 180 : 0 }}
+                    transition={{ duration: 0.75, ease: "easeInOut" }}
+                  >
+                    <div
+                      className={cn(
+                        "absolute inset-0 flex h-full w-full justify-center gap-6",
+                        showSelector
+                          ? "pointer-events-none"
+                          : "pointer-events-auto",
+                      )}
+                      style={{ backfaceVisibility: "hidden" }}
+                    >
+                      {roomState.set ? (
+                        <SetVisualizer className="" set={roomState.set} />
+                      ) : null}
+                    </div>
+
+                    <div
+                      className={cn(
+                        "absolute inset-0 h-full w-full",
+                        showSelector
+                          ? "pointer-events-auto"
+                          : "pointer-events-none",
+                      )}
+                      style={{
+                        backfaceVisibility: "hidden",
+                        transform: "rotateY(180deg)",
+                      }}
+                    >
+                      <SelectAnimeSet
+                        changingSet={changingSet}
+                        setIsChangingSet={setIsChangingSet}
+                      />
+                    </div>
+                  </motion.div>
+                );
+              })()
             )}
           </div>
           <Chat className="h-192 w-160" />
@@ -170,94 +229,6 @@ export default function Lobby() {
 
         {roomState.status === "playing" && (
           <Button onClick={() => router.push("/play")}>Go to Game</Button>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function SelectAnimeSet() {
-  const [search, setSearch] = useState("");
-  const [query, setQuery] = useState("");
-
-  const {
-    roomId,
-    playerName,
-    roomState,
-    connected,
-    error,
-    playerId,
-    isHost,
-    leaveRoom,
-    startGame,
-    selectSet,
-  } = useParty();
-
-  const { data: sets, isLoading } = api.sets.getAnimeSets.useQuery({
-    search: query,
-  });
-
-  useEffect(() => {
-    setTimeout(() => {
-      setQuery(search);
-    }, 500);
-  }, [search]);
-
-  const set = roomState!.set;
-
-  return (
-    <div className="h-full w-full flex-col gap-3">
-      <ButtonGroup className="mb-5 w-full">
-        <Input
-          placeholder="Search for character set..."
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-          className="w-full"
-          maxLength={45}
-        />
-        <Button className="hover:cursor-pointer" variant="secondary">
-          Search
-        </Button>
-      </ButtonGroup>
-      <div className="flex h-[60vh] flex-col gap-3">
-        {isLoading ? (
-          <Loading
-            message="Loading character sets..."
-            className="h-full w-full"
-          />
-        ) : sets && sets.length > 0 ? (
-          sets.map((s) => (
-            <div
-              key={s.id}
-              className="border-muted flex h-24 flex-row gap-3 rounded-xl border px-5 py-2 hover:cursor-pointer hover:bg-zinc-700"
-              onClick={(e) => {
-                e.preventDefault();
-                if (roomState?.set?.id === s.id) return;
-                selectSet(s.id);
-              }}
-            >
-              {s.img ? (
-                <Image
-                  alt={s.name + "photo"}
-                  src={s.img}
-                  width={500}
-                  height={500}
-                  className="h-20 w-20 rounded-lg"
-                />
-              ) : (
-                <div> </div>
-              )}
-              <div className="h-full w-full">
-                <h3 className="text-xl font-semibold">{s.name}</h3>
-                <p className="text-lg">By user: {s.creatorName}</p>
-                <p className="text-lg">{s.plays} plays</p>
-              </div>
-            </div>
-          ))
-        ) : (
-          <div className="h-full w-full text-lg font-semibold">
-            No character sets found for: {query}
-          </div>
         )}
       </div>
     </div>

@@ -57,8 +57,13 @@ export type RoomState = {
   turnDurationMs: number; // configurable turn duration
   turnEndsAt: number | null; // epoch ms when current turn ends
   timeRemainingMs: number | null; // server-computed remaining time (updated every second)
+  gameStartedAt: number | null; // epoch ms when current game started
+  maxGameDurationMs: number; // hard cap for game duration
+  maxTurns: number; // hard cap for number of turns in one game
+  turnCount: number; // number of turns that have happened in current game
   chat: Message[];
   winnerId: string | null; // stable player ID of the winner
+  drawReason: "turn-limit" | "time-limit" | null;
 };
 
 export type Message = {

@@ -74,7 +74,7 @@ export default function EliminationScreen({
       animate={{ opacity: 1 }}
       transition={{ duration: prefersReducedMotion ? 0 : 0.35 }}
       className={cn(
-        "fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm",
+        "fixed inset-0 z-50 flex items-center justify-center bg-black/65 p-4 backdrop-blur-sm",
         className,
       )}
       style={{ "--elim-rgb": accent } as CSSProperties}
@@ -83,7 +83,7 @@ export default function EliminationScreen({
         initial={{ opacity: 0, y: 24, scale: 0.97 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: prefersReducedMotion ? 0 : 0.5 }}
-        className="relative w-full max-w-3xl overflow-hidden rounded-2xl border border-[rgb(var(--elim-rgb)/0.35)] bg-black/50 p-6 shadow-2xl"
+        className="relative w-full max-w-3xl overflow-hidden rounded-2xl border border-[rgb(var(--elim-rgb)/0.35)] bg-black/50 p-6 shadow-2xl backdrop-blur-xl"
       >
         <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
           <div className="absolute top-1/2 left-1/2 h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[rgb(var(--elim-rgb)/0.12)] blur-3xl" />

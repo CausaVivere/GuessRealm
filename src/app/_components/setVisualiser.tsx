@@ -1,173 +1,188 @@
 import { cn } from "~/lib/utils";
-import Image from "next/image";
-import type { AnimeCharacter, AnimeGameSet } from "~/server/api/utils/jikan";
+import type { AnimeGameSet } from "~/server/api/utils/jikan";
 import { useParty } from "~/utils/PartyProvider";
-import { User2 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { motion, useAnimationControls, useReducedMotion } from "framer-motion";
+import { useEffect, useRef, type CSSProperties } from "react";
+import { Crown } from "lucide-react";
 
-const HOLD_TO_GUESS_MS = 3000;
+import { CharacterCard } from "./characterCard";
+import { twColor500ToRgb } from "~/utils/general";
+
+const BOARD_FLIP_TO_BACK_SECONDS = 0.6;
+const BOARD_BACK_HOLD_SECONDS = 1.0;
+const BOARD_FLIP_TO_FRONT_SECONDS = 0.6;
+
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export default function SetVisualizer({
   set,
   className,
   inGame,
+  turnChangeToken,
+  turnLabel,
+  myTurn,
 }: {
   set: AnimeGameSet;
   className?: string;
   inGame?: boolean;
+  turnChangeToken?: string;
+  turnLabel?: string;
+  myTurn?: boolean;
 }) {
-  const { turnCard, send } = useParty();
-  return (
-    <div className={cn("grid h-full w-fit grid-cols-6 gap-6", className)}>
-      {set.characters.map((char) => (
-        <CharacterCard
-          key={char.id}
-          char={char}
-          onTurn={() => {
-            if (inGame) {
-              turnCard(char.id);
-            }
-          }}
-          onGuess={() => send({ type: "makeGuess", characterId: char.id })}
-          inGame={inGame}
-        />
-      ))}
-    </div>
+  const { turnCard, send, roomState, player } = useParty();
+  const prefersReducedMotion = useReducedMotion();
+  const boardControls = useAnimationControls();
+  const previousTurnRef = useRef<string | undefined>(turnChangeToken);
+  const boardRotationRef = useRef(0);
+  const animationRunIdRef = useRef(0);
+
+  const currentPlayer = roomState?.players.find(
+    (p) => p.id === roomState?.turn,
   );
-}
 
-export function CharacterCard({
-  char,
-  onTurn,
-  onGuess,
-  className,
-  inGame,
-  ...props
-}: {
-  char: AnimeCharacter;
-  onTurn?: () => void;
-  onGuess?: () => void;
-  className?: string;
-  inGame?: boolean;
-} & React.HTMLAttributes<HTMLDivElement>) {
-  const { playerId, roomState } = useParty();
-  const nowPlaying = roomState?.players.find((p) => p.id === roomState.turn);
-  const isTurnt = !inGame ? false : nowPlaying?.turnt.includes(char.id);
-
-  const isMyTurn = roomState?.turn === playerId;
-  const canInteract = !!inGame && !!isMyTurn && roomState?.status === "playing";
-
-  const [holdProgress, setHoldProgress] = useState(0);
-  const [didTriggerGuess, setDidTriggerGuess] = useState(false);
-  const holdStartRef = useRef<number | null>(null);
-  const holdTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const rafRef = useRef<number | null>(null);
-
-  const clearHoldTracking = () => {
-    if (holdTimeoutRef.current) {
-      clearTimeout(holdTimeoutRef.current);
-      holdTimeoutRef.current = null;
-    }
-    if (rafRef.current) {
-      cancelAnimationFrame(rafRef.current);
-      rafRef.current = null;
-    }
-    holdStartRef.current = null;
-  };
+  const accent = twColor500ToRgb(
+    currentPlayer?.color ?? player?.color ?? "gray-500",
+  );
 
   useEffect(() => {
-    return () => {
-      clearHoldTracking();
-    };
-  }, []);
+    if (!turnChangeToken) return;
 
-  const startHold = () => {
-    if (!canInteract || isTurnt) return;
+    const hasChanged =
+      previousTurnRef.current && previousTurnRef.current !== turnChangeToken;
 
-    clearHoldTracking();
-    setDidTriggerGuess(false);
-    holdStartRef.current = performance.now();
-
-    const updateProgress = () => {
-      if (!holdStartRef.current) return;
-      const elapsed = performance.now() - holdStartRef.current;
-      const progress = Math.min(1, elapsed / HOLD_TO_GUESS_MS);
-      setHoldProgress(progress);
-
-      if (progress < 1) {
-        rafRef.current = requestAnimationFrame(updateProgress);
-      }
-    };
-
-    rafRef.current = requestAnimationFrame(updateProgress);
-    holdTimeoutRef.current = setTimeout(() => {
-      setDidTriggerGuess(true);
-      setHoldProgress(1);
-      onGuess?.();
-      clearHoldTracking();
-      setTimeout(() => setHoldProgress(0), 120);
-    }, HOLD_TO_GUESS_MS);
-  };
-
-  const endHold = () => {
-    clearHoldTracking();
-    if (!didTriggerGuess) {
-      setHoldProgress(0);
+    if (prefersReducedMotion) {
+      previousTurnRef.current = turnChangeToken;
+      return;
     }
-    setTimeout(() => setDidTriggerGuess(false), 0);
-  };
 
-  const handleClick = () => {
-    if (!canInteract) return;
-    if (didTriggerGuess) return;
-    onTurn?.();
-  };
+    if (hasChanged) {
+      const nextFrontRotation = boardRotationRef.current + 360;
+      const backRotation = boardRotationRef.current + 180;
+      boardRotationRef.current = nextFrontRotation;
 
-  const progressDegrees = Math.max(0, Math.min(360, holdProgress * 360));
+      const runId = animationRunIdRef.current + 1;
+      animationRunIdRef.current = runId;
+
+      void (async () => {
+        await boardControls.start({
+          rotateY: backRotation,
+          transition: {
+            duration: BOARD_FLIP_TO_BACK_SECONDS,
+            ease: "easeInOut",
+          },
+        });
+        if (runId !== animationRunIdRef.current) return;
+
+        await wait(BOARD_BACK_HOLD_SECONDS * 1000);
+        if (runId !== animationRunIdRef.current) return;
+
+        await boardControls.start({
+          rotateY: nextFrontRotation,
+          transition: {
+            duration: BOARD_FLIP_TO_FRONT_SECONDS,
+            ease: "easeInOut",
+          },
+        });
+      })();
+    }
+
+    previousTurnRef.current = turnChangeToken;
+  }, [boardControls, prefersReducedMotion, turnChangeToken]);
 
   return (
     <div
       className={cn(
-        "group relative flex h-44 w-30 flex-col items-center justify-center rounded-3xl p-2 hover:cursor-pointer",
+        "relative rounded-[2.2rem] p-0.5 perspective-distant",
         className,
       )}
-      onPointerDown={startHold}
-      onPointerUp={endHold}
-      onPointerLeave={endHold}
-      onPointerCancel={endHold}
-      onClick={handleClick}
-      {...props}
+      style={
+        {
+          "--accent": accent,
+        } as CSSProperties
+      }
     >
-      {holdProgress > 0.05 ? (
-        <div
-          className="pointer-events-none absolute -inset-1 rounded-[1.65rem]"
-          style={{
-            background: `conic-gradient(from -90deg, rgba(250, 204, 21, 0.95) ${progressDegrees}deg, rgba(250, 204, 21, 0.15) ${progressDegrees}deg 360deg)`,
-            boxShadow: "0 0 18px rgba(250, 204, 21, 0.45)",
-          }}
-        />
-      ) : null}
-
-      <div className="relative flex h-full w-full items-center justify-center rounded-3xl bg-linear-to-b from-red-950/40 to-zinc-950">
-        {!isTurnt ? (
-          <Image
-            alt={char.name + " image"}
-            src={char.image!}
-            width={500}
-            height={800}
-            className="h-40 w-28 rounded-2xl"
-          />
-        ) : (
-          <div className="h-40 w-28 rounded-2xl">
-            <User2 className="h-full w-full" color="gray" />
-          </div>
+      <div
+        className={cn(
+          "absolute -inset-3 rounded-[2.6rem] blur-xl",
+          myTurn === true ? "animate-[pulse_3.5s_ease-in-out_infinite]" : "",
+          myTurn === true
+            ? "border bg-[rgb(var(--accent)/0.6)]"
+            : "bg-[rgb(var(--accent)/0.2)]",
         )}
-      </div>
-      {holdProgress > 0.05 && holdProgress < 1 ? (
-        <div className="pointer-events-none absolute top-1 left-1 rounded-full bg-yellow-500/90 px-1.5 py-0.5 text-[10px] font-semibold text-black">
-          {Math.ceil(((1 - holdProgress) * HOLD_TO_GUESS_MS) / 1000)}s
+      />
+
+      <motion.div
+        className="relative rounded-[2.1rem] border border-red-300/45 bg-zinc-950/95 shadow-[0_20px_60px_rgba(2,6,23,0.65)]"
+        style={{
+          transformStyle: "preserve-3d",
+        }}
+        animate={boardControls}
+        initial={{ rotateY: 0 }}
+      >
+        <div className="relative p-4" style={{ backfaceVisibility: "hidden" }}>
+          <div className="pointer-events-none absolute inset-1 rounded-[1.95rem] border border-red-200/20" />
+          <div className="pointer-events-none absolute inset-0 rounded-[2.05rem] bg-linear-to-b from-white/7 via-transparent to-black/25" />
+          <div className="pointer-events-none absolute top-2 right-5 text-[9px] font-semibold tracking-[0.26em] text-red-100/80 uppercase">
+            Guessverse Board
+          </div>
+
+          <div className="relative grid h-full w-fit grid-cols-6 gap-6">
+            {set.characters.map((char, i) => (
+              <CharacterCard
+                key={char.id}
+                char={char}
+                index={i}
+                onTurn={() => {
+                  if (inGame) {
+                    turnCard(char.id);
+                  }
+                }}
+                onGuess={() =>
+                  send({ type: "makeGuess", characterId: char.id })
+                }
+                inGame={inGame}
+              />
+            ))}
+          </div>
         </div>
-      ) : null}
+
+        <div
+          className="absolute inset-0 overflow-hidden rounded-[2.1rem] border border-red-200/50 bg-zinc-950"
+          style={{
+            backfaceVisibility: "hidden",
+            transform: "rotateY(180deg)",
+          }}
+        >
+          <div className="absolute inset-1 rounded-[1.95rem] bg-linear-to-b from-zinc-800 via-zinc-900 to-black" />
+          <div className="absolute inset-2 rounded-[1.7rem] border border-red-200/35" />
+          <div className="absolute inset-4 rounded-[1.45rem] border border-white/12" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.28)_1px,transparent_0)] bg-size-[10px_10px] opacity-30" />
+
+          <div className="relative flex h-full w-full flex-col items-center justify-center gap-5">
+            <div className="text-2xl font-semibold tracking-[0.28em] text-red-100/80 uppercase">
+              Guessverse
+            </div>
+
+            <div className="relative flex h-24 w-24 items-center justify-center rounded-full border border-red-200/45 bg-zinc-900/70">
+              <div className="absolute inset-1 rounded-full border border-white/25" />
+              <Crown className="relative h-10 w-10 text-red-100/90" />
+            </div>
+
+            <div className="rounded-xl border border-white/20 bg-black/25 px-6 py-3 text-center">
+              <p className="text-lg tracking-[0.2em] text-cyan-100/80 uppercase">
+                Next Turn
+              </p>
+              <p className="mt-1 text-3xl font-semibold text-red-50">
+                {turnLabel ?? "Get Ready"}
+              </p>
+            </div>
+
+            <div className="text-xl tracking-[0.26em] text-red-100/70 uppercase">
+              {set.name}
+            </div>
+          </div>
+        </div>
+      </motion.div>
     </div>
   );
 }

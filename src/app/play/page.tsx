@@ -18,7 +18,9 @@ import {
   Skull,
 } from "lucide-react";
 import EndScreen from "../_components/endScreen";
+import DrawScreen from "../_components/drawScreen";
 import EliminationScreen from "../_components/eliminationScreen";
+import Players from "./_components/players";
 
 export default function PlayPage() {
   const [gameOver, setGameOver] = useState(false);
@@ -53,6 +55,20 @@ export default function PlayPage() {
     if (!roomState?.turnEndsAt) return null;
     return Math.max(0, Math.ceil((roomState.turnEndsAt - now) / 1000));
   }, [roomState?.turnEndsAt, now]);
+
+  const gameTimeLeftSeconds = useMemo(() => {
+    if (!roomState?.gameStartedAt) return null;
+    const elapsed = now - roomState.gameStartedAt;
+    return Math.max(
+      0,
+      Math.ceil((roomState.maxGameDurationMs - elapsed) / 1000),
+    );
+  }, [roomState?.gameStartedAt, roomState?.maxGameDurationMs, now]);
+
+  const turnsLeft = useMemo(() => {
+    if (!roomState) return null;
+    return Math.max(0, roomState.maxTurns - roomState.turnCount);
+  }, [roomState]);
 
   useEffect(() => {
     if (!roomId) {
@@ -118,21 +134,31 @@ export default function PlayPage() {
   const guessedCharacterId =
     set.characters.find((c) => !player?.turnt.includes(c.id))?.id ?? null;
 
+  const isDraw = roomState.status === "finished" && roomState.winnerId === null;
+
   // ─── Game is playing ────────────────────────────────────────
   return (
     <div className="bg-background flex min-h-screen flex-col items-center justify-center gap-6">
-      <div className="mt-10 flex w-full max-w-3xl flex-col items-center justify-center gap-5 px-4">
+      <div className="mt-10 flex w-full max-w-3xl items-center justify-center gap-5 px-4">
         <div className="text-3xl">
           <span className="font-medium">Turn:</span>{" "}
           {currentTurnPlayer?.name ?? "—"}
           {roomState.turn === playerId ? " (you)" : ""}
         </div>
-        <div className="text-5xl font-bold text-yellow-500">
+        <div className="text-3xl font-bold text-yellow-500">
           {remainingSeconds != null ? `${remainingSeconds}s` : "—"}
+        </div>
+        <div className="flex items-center gap-2 text-xs text-white/85 uppercase">
+          <span className="rounded-full border border-white/20 bg-white/5 px-2 py-1 tracking-wide">
+            Game left: {gameTimeLeftSeconds != null ? `${Math.floor(gameTimeLeftSeconds / 60)}m ${gameTimeLeftSeconds % 60}s` : "—"}
+          </span>
+          <span className="rounded-full border border-white/20 bg-white/5 px-2 py-1 tracking-wide">
+            Turns left: {turnsLeft ?? "—"}
+          </span>
         </div>
       </div>
 
-      <div className="flex h-full flex-row items-center justify-center gap-5">
+      <div className="flex h-full flex-row items-center justify-center">
         <div className="flex w-full gap-5">
           {!myTurn ? (
             <div className="flex h-full w-100 flex-col items-center justify-center">
@@ -148,12 +174,16 @@ export default function PlayPage() {
           <SetVisualizer
             set={set}
             inGame={true}
-            className={cn("h-full rounded-3xl p-2", {
-              "border-2 border-red-800": myTurn,
-            })}
+            turnChangeToken={roomState.turn ?? undefined}
+            turnLabel={currentTurnPlayer?.name ?? "Unknown"}
+            className={cn("h-full rounded-3xl p-2")}
+            myTurn={myTurn}
           />
         </div>
-        <Chat className="h-192 w-100" />
+        <div className="-ml-18 flex h-192 max-h-192 min-h-0 w-120 flex-col items-stretch gap-2">
+          <Players className="h-auto max-h-64 w-full shrink-0 overflow-y-auto" />
+          <Chat className="min-h-0 w-full flex-1" />
+        </div>
       </div>
 
       <div className="flex h-60 gap-8">
@@ -208,7 +238,8 @@ export default function PlayPage() {
             : "hidden"
         }
       >
-        {gameOver ? <EndScreen /> : null}
+        {gameOver && isDraw ? <DrawScreen /> : null}
+        {gameOver && !isDraw ? <EndScreen /> : null}
         {!gameOver && showElimination && incorrectGuess ? (
           <EliminationScreen
             message={incorrectGuess.message}
@@ -263,8 +294,14 @@ export function Instructions({ className }: { className?: string }) {
             It's your turn to guess the character! Use the chat to ask questions
             and narrow down the possibilities.
           </p>
+          <p className="text-muted-foreground mt-2 text-sm font-bold">
+            YES or NO questions ONLY!
+          </p>
+          <p className="mt-2 text-sm text-blue-400/80">
+            Pro tip: ask about the character's anime, role, or traits to get
+            useful hints from other players.
+          </p>
         </div>
-
         <div className="grid grid-cols-1 gap-3">
           <div className="border-border/60 bg-background/60 rounded-xl border p-3 backdrop-blur">
             <div className="mb-1 flex items-center gap-2 text-sm font-medium">

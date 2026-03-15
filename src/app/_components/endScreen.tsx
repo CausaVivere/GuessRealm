@@ -110,7 +110,7 @@ export default function EndScreen({
         initial={{ opacity: 0, y: 24, scale: 0.97 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: prefersReducedMotion ? 0 : 0.5 }}
-        className="relative w-full max-w-3xl overflow-hidden rounded-2xl border border-white/15 bg-black/50 p-6 shadow-2xl"
+        className="relative w-full max-w-3xl overflow-hidden rounded-2xl border border-white/15 bg-black/50 p-6 shadow-2xl backdrop-blur-xl"
         style={{ "--winner-rgb": winnerRgb } as CSSProperties}
       >
         <div className="mb-4 flex items-center justify-between gap-3">

@@ -10,6 +10,9 @@ import {
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 const INTERNAL_SECRET = process.env.INTERNAL_SECRET ?? "";
+const MAX_PLAYERS = 8;
+const DEFAULT_MAX_GAME_DURATION_MS = 30 * 60 * 1000;
+const DEFAULT_MAX_TURNS = 100;
 
 // Maps connectionId → stable playerId for disconnect handling
 type ConnectionMap = Map<string, string>;
@@ -25,8 +28,13 @@ export default class GameRoom implements Party.Server {
     turnDurationMs: 45_000,
     turnEndsAt: null,
     timeRemainingMs: null,
+    gameStartedAt: null,
+    maxGameDurationMs: DEFAULT_MAX_GAME_DURATION_MS,
+    maxTurns: DEFAULT_MAX_TURNS,
+    turnCount: 0,
     chat: [],
     winnerId: null,
+    drawReason: null,
   };
 
   private tickInterval: ReturnType<typeof setInterval> | null = null;
@@ -94,6 +102,41 @@ export default class GameRoom implements Party.Server {
     player.connected = false;
     player.connectionId = "";
 
+    // If host disconnected, assign new host
+    if (this.state.hostId === playerId) {
+      const nextHost = this.state.players.find((p) => p.connected);
+      this.state.hostId = nextHost?.id ?? null;
+    }
+
+    // If all players disconnected, fully reset room state.
+    // PartyKit will hibernate/evict idle rooms; this ensures clean joins.
+    if (this.state.players.filter((p) => p.connected).length === 0) {
+      this.stopTurnTimer();
+      this.connections.clear();
+      this.resetRoomState();
+      this.broadcast({ type: "room-state", state: this.state });
+      return;
+    }
+
+    const remaining = this.state.players.filter(
+      (p) => p.connected && !p.eliminated,
+    );
+    // If the disconnected player was still in the game, check if we need to end or advance the turn
+    if (remaining.length === 1 && this.state.status === "playing") {
+      const lastPlayer = remaining[0]!;
+      this.state.winnerId = lastPlayer.id;
+      this.state.players = this.state.players.map((p) =>
+        p.id === lastPlayer.id ? { ...p, score: p.score + 1 } : p,
+      );
+      this.broadcast({ type: "room-state", state: this.state });
+      this.delayRestart();
+      return;
+    }
+
+    if (this.state.turn === playerId) {
+      this.advanceTurn();
+    }
+
     this.broadcast({ type: "room-state", state: this.state });
   }
 
@@ -123,6 +166,15 @@ export default class GameRoom implements Party.Server {
       return;
     }
 
+    if (this.state.players.length >= MAX_PLAYERS) {
+      this.send(conn, {
+        type: "error",
+        message: `Room is full (max ${MAX_PLAYERS} players)`,
+      });
+      this.connections.delete(conn.id);
+      return;
+    }
+
     // New player — only allowed during waiting
     if (this.state.status !== "waiting") {
       this.send(conn, { type: "error", message: "Game already in progress" });
@@ -138,7 +190,7 @@ export default class GameRoom implements Party.Server {
       characterToGuess: null,
       turnt: [],
       eliminated: false,
-      color: playerColors[Math.floor(Math.random() * playerColors.length)]!,
+      color: this.pickColor(),
     };
     this.state.players.push(player);
 
@@ -194,6 +246,9 @@ export default class GameRoom implements Party.Server {
       connectedPlayers[Math.floor(Math.random() * connectedPlayers.length)]
         ?.id ?? null;
     this.state.status = "playing";
+    this.state.gameStartedAt = Date.now();
+    this.state.turnCount = this.state.turn ? 1 : 0;
+    this.state.drawReason = null;
 
     // Initialize turn end; clients compute the remaining seconds locally.
     this.state.turnEndsAt = Date.now() + this.state.turnDurationMs;
@@ -315,6 +370,11 @@ export default class GameRoom implements Party.Server {
       return;
     }
 
+    if (this.isDrawByGameDuration()) {
+      this.endAsDraw("time-limit");
+      return;
+    }
+
     const now = Date.now();
     const endsAt = this.state.turnEndsAt;
 
@@ -334,6 +394,13 @@ export default class GameRoom implements Party.Server {
   }
 
   private advanceTurn() {
+    if (this.state.status !== "playing") return;
+
+    if (this.state.turnCount >= this.state.maxTurns) {
+      this.endAsDraw("turn-limit");
+      return;
+    }
+
     const connected = this.state.players.filter(
       (p) => p.connected && !p.eliminated,
     );
@@ -349,6 +416,7 @@ export default class GameRoom implements Party.Server {
     const nextIndex =
       currentIndex === -1 ? 0 : (currentIndex + 1) % connected.length;
     this.state.turn = connected[nextIndex]?.id ?? connected[0]!.id;
+    this.state.turnCount += 1;
     this.state.turnEndsAt = Date.now() + this.state.turnDurationMs;
     this.state.timeRemainingMs = null;
 
@@ -476,6 +544,7 @@ export default class GameRoom implements Party.Server {
   }
 
   private delayRestart() {
+    this.stopTurnTimer();
     setTimeout(() => {
       this.state.status = "waiting";
       this.broadcast({ type: "room-state", state: this.state });
@@ -489,6 +558,44 @@ export default class GameRoom implements Party.Server {
       turnt: [],
       eliminated: false,
     }));
+  }
+
+  private resetRoomState() {
+    this.state.players = [];
+    this.state.hostId = null;
+    this.state.status = "waiting";
+    this.state.set = null;
+    this.state.turn = null;
+    this.state.turnEndsAt = null;
+    this.state.timeRemainingMs = null;
+    this.state.gameStartedAt = null;
+    this.state.turnCount = 0;
+    this.state.chat = [];
+    this.state.winnerId = null;
+    this.state.drawReason = null;
+  }
+
+  private isDrawByGameDuration() {
+    if (!this.state.gameStartedAt) return false;
+    const elapsed = Date.now() - this.state.gameStartedAt;
+    return elapsed >= this.state.maxGameDurationMs;
+  }
+
+  private endAsDraw(reason: "turn-limit" | "time-limit") {
+    this.state.status = "finished";
+    this.state.winnerId = null;
+    this.state.drawReason = reason;
+    this.stopTurnTimer();
+    this.broadcast({ type: "room-state", state: this.state });
+    this.delayRestart();
+  }
+
+  private pickColor(): string {
+    const usedColors = new Set(this.state.players.map((p) => p.color));
+    const available = playerColors.filter((c) => !usedColors.has(c));
+    return (
+      available[Math.floor(Math.random() * available.length)] || "gray-500"
+    );
   }
 }
 
