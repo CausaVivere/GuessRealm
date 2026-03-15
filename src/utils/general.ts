@@ -1,3 +1,26 @@
+export function twColor500ToRgb(color?: string): string {
+  switch (color) {
+    case "red-500":
+      return "239 68 68";
+    case "blue-500":
+      return "59 130 246";
+    case "violet-500":
+      return "139 92 246";
+    case "yellow-500":
+      return "234 179 8";
+    case "purple-500":
+      return "168 85 247";
+    case "orange-500":
+      return "249 115 22";
+    case "pink-500":
+      return "236 72 153";
+    case "teal-500":
+      return "20 184 166";
+    default:
+      return "250 204 21"; // yellow fallback
+  }
+}
+
 export function base64ToFile(
   base64: string,
   filename: string,

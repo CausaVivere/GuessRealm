@@ -37,7 +37,18 @@ export default function HomePage() {
 
   // ─── Connecting... ──────────────────────────────────────────
   if (roomId && !connected) {
-    return <Loading message={`Connecting to room ${roomId}...`} fullScreen />;
+    return (
+      <div className="h-full w-full flex-col">
+        <Loading message={`Connecting to room ${roomId}...`} fullScreen />;
+        <Button
+          variant="outline"
+          className="absolute bottom-4 left-1/2 -translate-x-1/2"
+          onClick={leaveRoom}
+        >
+          Leave Room
+        </Button>
+      </div>
+    );
   }
 
   // ─── Not in a room — show create/join ────────────────────────

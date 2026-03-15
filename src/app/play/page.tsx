@@ -4,7 +4,7 @@ import { useParty } from "~/utils/PartyProvider";
 import { useRouter } from "next/navigation";
 import { Button } from "~/components/ui/button";
 import Loading from "~/components/ui/loading";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import SetVisualizer from "../_components/setVisualiser";
 import { cn } from "~/lib/utils";
 import { ChevronLeft } from "lucide-react";
@@ -18,9 +18,11 @@ import {
   Skull,
 } from "lucide-react";
 import EndScreen from "../_components/endScreen";
+import EliminationScreen from "../_components/eliminationScreen";
 
 export default function PlayPage() {
   const [gameOver, setGameOver] = useState(false);
+  const [showElimination, setShowElimination] = useState(false);
 
   const {
     roomState,
@@ -31,8 +33,15 @@ export default function PlayPage() {
     leaveRoom,
     endTurn,
     player,
+    incorrectGuess,
+    clearIncorrectGuess,
   } = useParty();
   const router = useRouter();
+
+  const handleCloseElimination = useCallback(() => {
+    setShowElimination(false);
+    clearIncorrectGuess();
+  }, [clearIncorrectGuess]);
 
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
@@ -56,6 +65,18 @@ export default function PlayPage() {
       setGameOver(true);
     }
   }, [roomState]);
+
+  useEffect(() => {
+    if (!incorrectGuess) return;
+    if (roomState?.status === "finished") return;
+    setShowElimination(true);
+  }, [incorrectGuess, roomState?.status]);
+
+  useEffect(() => {
+    if (!gameOver) return;
+    setShowElimination(false);
+    clearIncorrectGuess();
+  }, [gameOver, clearIncorrectGuess]);
 
   // Not in a room — redirect to home
   if (!roomId) {
@@ -93,6 +114,9 @@ export default function PlayPage() {
     myTurn &&
     remainingSeconds !== null &&
     player?.turnt.length === set.characters.length - 1;
+
+  const guessedCharacterId =
+    set.characters.find((c) => !player?.turnt.includes(c.id))?.id ?? null;
 
   // ─── Game is playing ────────────────────────────────────────
   return (
@@ -136,12 +160,13 @@ export default function PlayPage() {
         <Button
           variant="secondary"
           onClick={() => {
-            send({ type: "makeGuess", characterId: characterToGuess.id });
+            if (!guessedCharacterId) return;
+            send({ type: "makeGuess", characterId: guessedCharacterId });
           }}
           className={cn(
             "h-24 w-64 bg-blue-900 text-4xl font-bold text-blue-100",
             {
-              hidden: !canMakeGuess,
+              hidden: !canMakeGuess || !guessedCharacterId,
             },
           )}
         >
@@ -178,12 +203,21 @@ export default function PlayPage() {
 
       <div
         className={
-          gameOver
+          gameOver || (showElimination && !!incorrectGuess)
             ? "absolute inset-0 z-50 flex items-center justify-center"
             : "hidden"
         }
       >
         {gameOver ? <EndScreen /> : null}
+        {!gameOver && showElimination && incorrectGuess ? (
+          <EliminationScreen
+            message={incorrectGuess.message}
+            guessedChar={incorrectGuess.characterId}
+            eliminatedPlayerId={incorrectGuess.playerId}
+            eliminatedName={incorrectGuess.playerName}
+            onClose={handleCloseElimination}
+          />
+        ) : null}
       </div>
     </div>
   );

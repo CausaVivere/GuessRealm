@@ -13,7 +13,7 @@ import { api } from "~/trpc/react";
 import { useParty } from "~/utils/PartyProvider";
 import SetVisualizer from "../_components/setVisualiser";
 import type { AnimeGameSet } from "~/server/api/utils/jikan";
-import { Video } from "lucide-react";
+import { Crown, Video } from "lucide-react";
 import Chat from "../_components/chat";
 
 export default function Lobby() {
@@ -133,6 +133,10 @@ export default function Lobby() {
                 {!player.connected && (
                   <span className="text-xs text-red-400">disconnected</span>
                 )}
+                <p className="ml-auto flex items-center gap-1 text-lg font-bold">
+                  {player.score}
+                  <Crown className="inline-block h-4 w-4 text-yellow-500" />
+                </p>
               </div>
             ))}
           </div>
@@ -150,7 +154,7 @@ export default function Lobby() {
               </div>
             )}
           </div>
-          <Chat className="h-192 w-120" />
+          <Chat className="h-192 w-160" />
         </div>
 
         <div className="mt-5 flex justify-between gap-2">

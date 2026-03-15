@@ -21,8 +21,19 @@ export type ServerMessage =
   | { type: "game-started" }
   | { type: "error"; message: string }
   | { type: "correct-guess"; winner: string }
-  | { type: "last-player-standing"; winner: string }
-  | { type: "incorrect-guess"; message: string };
+  | {
+      type: "last-player-standing";
+      winner: string;
+      loser?: string;
+      guessedCharacterId?: number;
+    }
+  | {
+      type: "incorrect-guess";
+      message: string;
+      characterId?: number;
+      playerId?: string;
+      playerName?: string;
+    };
 
 export type Player = {
   id: string; // stable player ID (generated client-side, persisted in sessionStorage)

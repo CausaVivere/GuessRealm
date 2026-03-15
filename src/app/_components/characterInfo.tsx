@@ -11,7 +11,7 @@ export default function AnimeCharacterInfo({
   character: AnimeCharacter;
   className?: string;
 } & React.HTMLAttributes<HTMLDivElement>) {
-  const anime = character.anime;
+  const anime = character?.anime;
 
   if (!anime) {
     return (

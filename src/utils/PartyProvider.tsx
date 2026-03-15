@@ -19,7 +19,6 @@ import type {
 import { useLocalStorage } from "./hooks";
 import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { set } from "zod";
 
 const PARTYKIT_HOST = process.env.NEXT_PUBLIC_PARTYKIT_HOST ?? "localhost:1999";
 
@@ -75,6 +74,17 @@ type PartyContextValue = {
   connected: boolean;
   error: string | null;
   player: Player | null;
+  incorrectGuess: {
+    message: string;
+    characterId?: number;
+    playerId?: string;
+    playerName?: string;
+  } | null;
+  lastPlayerStandingWinner: {
+    winner: string;
+    loser?: string;
+    guessedCharacterId?: number;
+  } | null;
 
   // Actions
   setPlayerName: (name: string) => void;
@@ -87,6 +97,7 @@ type PartyContextValue = {
   turnCard: (characterId: number) => void;
   endTurn: () => void;
   sendMessage: (message: string) => void;
+  clearIncorrectGuess: () => void;
 };
 
 const PartyContext = createContext<PartyContextValue | null>(null);
@@ -100,6 +111,17 @@ export function PartyProvider({ children }: { children: ReactNode }) {
   const [connected, setConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isHost, setIsHost] = useState(false);
+  const [incorrectGuess, setIncorrectGuess] = useState<{
+    message: string;
+    characterId?: number;
+    playerId?: string;
+    playerName?: string;
+  } | null>(null);
+  const [lastPlayerStandingWinner, setLastPlayerStandingWinner] = useState<{
+    winner: string;
+    loser?: string;
+    guessedCharacterId?: number;
+  } | null>(null);
   const socketRef = useRef<PartySocket | null>(null);
   const playerNameRef = useRef(playerName);
   const hasRestoredRef = useRef(false);
@@ -158,6 +180,11 @@ export function PartyProvider({ children }: { children: ReactNode }) {
           case "room-state":
             setError(null);
             setRoomState(msg.state);
+            // Keep end-of-round metadata visible during the result overlay.
+            // Clear it when a new game actually starts.
+            if (msg.state.status === "playing") {
+              setLastPlayerStandingWinner(null);
+            }
             break;
           case "player-joined":
             setRoomState((prev) =>
@@ -173,6 +200,22 @@ export function PartyProvider({ children }: { children: ReactNode }) {
                   }
                 : prev,
             );
+            break;
+          case "incorrect-guess":
+            setIncorrectGuess({
+              message: msg.message,
+              characterId: msg.characterId,
+              playerId: msg.playerId,
+              playerName: msg.playerName,
+            });
+            toast.error(msg.message);
+            break;
+          case "last-player-standing":
+            setLastPlayerStandingWinner({
+              winner: msg.winner,
+              loser: msg.loser,
+              guessedCharacterId: msg.guessedCharacterId,
+            });
             break;
           case "error":
             setError(msg.message);
@@ -228,6 +271,12 @@ export function PartyProvider({ children }: { children: ReactNode }) {
     setRoomState(null);
     setConnected(false);
     setError(null);
+    setIncorrectGuess(null);
+    setLastPlayerStandingWinner(null);
+  }, []);
+
+  const clearIncorrectGuess = useCallback(() => {
+    setIncorrectGuess(null);
   }, []);
 
   const startGame = useCallback(() => {
@@ -296,6 +345,8 @@ export function PartyProvider({ children }: { children: ReactNode }) {
         error,
         isHost,
         player,
+        incorrectGuess,
+        lastPlayerStandingWinner,
         setPlayerName,
         createRoom,
         joinRoom,
@@ -306,6 +357,7 @@ export function PartyProvider({ children }: { children: ReactNode }) {
         turnCard,
         endTurn,
         sendMessage,
+        clearIncorrectGuess,
       }}
     >
       {children}

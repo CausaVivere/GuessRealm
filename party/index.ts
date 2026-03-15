@@ -147,6 +147,8 @@ export default class GameRoom implements Party.Server {
   }
 
   private handleStartGame(conn: Party.Connection) {
+    this.resetPlayerStates();
+
     const playerId = this.connections.get(conn.id);
 
     // Only the host can start
@@ -332,7 +334,9 @@ export default class GameRoom implements Party.Server {
   }
 
   private advanceTurn() {
-    const connected = this.state.players.filter((p) => p.connected);
+    const connected = this.state.players.filter(
+      (p) => p.connected && !p.eliminated,
+    );
     if (connected.length === 0) {
       this.state.turn = null;
       this.state.turnEndsAt = null;
@@ -408,6 +412,9 @@ export default class GameRoom implements Party.Server {
     if (character.id === player.characterToGuess) {
       this.state.status = "finished";
       this.state.winnerId = player.id;
+      this.state.players = this.state.players.map((p) =>
+        p.id === player.id ? { ...p, score: p.score + 1 } : p,
+      );
       this.broadcast({ type: "room-state", state: this.state });
       this.delayRestart();
     } else {
@@ -416,17 +423,41 @@ export default class GameRoom implements Party.Server {
       );
 
       if (this.state.players.filter((p) => !p.eliminated).length === 1) {
+        const survivingPlayer =
+          this.state.players.find((p) => !p.eliminated) ?? null;
+
         this.state.status = "finished";
-        this.state.winnerId =
-          this.state.players.find((p) => !p.eliminated)?.id ?? null;
+        this.state.winnerId = survivingPlayer?.id ?? null;
+
+        if (survivingPlayer) {
+          this.state.players = this.state.players.map((p) =>
+            p.id === survivingPlayer.id ? { ...p, score: p.score + 1 } : p,
+          );
+        }
+
         this.broadcast({ type: "room-state", state: this.state });
+        this.broadcast({
+          type: "last-player-standing",
+          winner: survivingPlayer?.name ?? "Unknown",
+          loser: player.name,
+          guessedCharacterId: character.id,
+        });
         this.delayRestart();
+        return;
       }
 
+      this.state.turnEndsAt = Date.now() + this.state.turnDurationMs; // reset turn timer on incorrect guess
+      this.state.players = this.state.players.map((p) =>
+        p.id === player.id ? { ...p, eliminated: true } : p,
+      );
+      this.advanceTurn();
       this.broadcast({ type: "room-state", state: this.state });
-      this.send(conn, {
+      this.broadcast({
         type: "incorrect-guess",
-        message: "Wrong guess, you are eliminated!",
+        message: `${player.name} guessed wrong and was eliminated!`,
+        characterId: character.id,
+        playerId: player.id,
+        playerName: player.name,
       });
     }
   }
@@ -449,6 +480,15 @@ export default class GameRoom implements Party.Server {
       this.state.status = "waiting";
       this.broadcast({ type: "room-state", state: this.state });
     }, 3000);
+  }
+
+  private resetPlayerStates() {
+    this.state.players = this.state.players.map((p) => ({
+      ...p,
+      characterToGuess: null,
+      turnt: [],
+      eliminated: false,
+    }));
   }
 }
 
