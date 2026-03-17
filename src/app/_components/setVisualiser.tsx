@@ -126,7 +126,7 @@ export default function SetVisualizer({
             Guessverse - {set.name}
           </div>
 
-          <div className="relative grid h-full w-fit grid-cols-6 gap-6">
+          <div className="relative grid h-full w-fit grid-cols-6 gap-12 py-6 pr-6 2xl:gap-6 2xl:py-0 2xl:pr-0">
             {set.characters.map((char, i) => (
               <CharacterCard
                 key={char.id}

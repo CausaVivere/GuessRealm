@@ -31,15 +31,18 @@ export default function AnimeCharacterInfo({
             className="rounded-lg"
           />
           <div className="">
-            <p className="text-2xl font-bold"> {character.name}</p>
+            <p className="text-lg font-bold 2xl:text-2xl"> {character.name}</p>
             <div className="flex gap-3">
-              <p className="text-xl font-semibold"> {character.role}</p>
-              <p className="inline-flex items-center gap-1 text-xl font-semibold">
+              <p className="text-lg font-semibold 2xl:text-xl">
+                {" "}
+                {character.role}
+              </p>
+              <p className="inline-flex items-center gap-1 text-lg font-semibold 2xl:text-xl">
                 <Heart className="h-5 w-5" />
                 {character.favorites}
               </p>
             </div>
-            <p className="text-muted-foreground pt-2 text-sm">
+            <p className="text-muted-foreground pt-2 text-xs 2xl:text-sm">
               Anime details unavailable for this character payload.
             </p>
           </div>
@@ -76,13 +79,16 @@ export default function AnimeCharacterInfo({
           src={character.image!}
           width={150}
           height={300}
-          className="rounded-lg"
+          className="max-h-28 max-w-20 rounded-lg 2xl:max-h-none 2xl:max-w-none"
         />
         <div className="w-full">
-          <p className="text-3xl font-bold"> {character.name}</p>
+          <p className="text-xl font-bold 2xl:text-3xl"> {character.name}</p>
           <div className="flex gap-3">
-            <p className="text-lg font-semibold"> {character.role}</p>
-            <p className="inline-flex items-center gap-1 text-xl font-semibold">
+            <p className="text-base font-semibold 2xl:text-lg">
+              {" "}
+              {character.role}
+            </p>
+            <p className="inline-flex items-center gap-1 text-lg font-semibold 2xl:text-xl">
               <Heart className="h-5 w-5" />
               {character.favorites}
             </p>
@@ -115,11 +121,13 @@ export default function AnimeCharacterInfo({
           src={anime.image!}
           width={150}
           height={300}
-          className="rounded-lg"
+          className="max-h-28 max-w-20 rounded-lg 2xl:max-h-none 2xl:max-w-none"
         />
         <div className="flex flex-1 flex-col gap-2">
           <div className="flex flex-col">
-            <p className="text-xl leading-tight font-bold">{anime.title}</p>
+            <p className="text-lg leading-tight font-bold 2xl:text-xl">
+              {anime.title}
+            </p>
             {anime.titleEnglish && anime.titleEnglish !== anime.title ? (
               <p className="text-muted-foreground text-sm">
                 {anime.titleEnglish}
@@ -132,7 +140,7 @@ export default function AnimeCharacterInfo({
             ) : null}
           </div>
 
-          <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+          <div className="grid grid-cols-2 gap-x-1 gap-y-1 2xl:gap-x-4">
             <CompactStat label="Type" value={anime.type} />
             <CompactStat label="Source" value={anime.source} />
             <CompactStat label="Episodes" value={anime.episodes} />

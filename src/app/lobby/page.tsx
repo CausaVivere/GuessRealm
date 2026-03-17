@@ -67,9 +67,9 @@ export default function Lobby() {
 
   return (
     <div className="flex min-h-screen w-full flex-col items-center justify-center">
-      <div className="border-accent w-4/5 flex-col items-center justify-center gap-6 rounded-4xl border px-12 pt-5 pb-12 backdrop-blur-xl">
-        <div className="flex w-full flex-col items-center gap-2">
-          <h1 className="text-3xl font-bold">Room: {roomId}</h1>
+      <div className="border-accent w-full flex-col items-center justify-center gap-6 rounded-4xl border px-5 pt-5 pb-12 backdrop-blur-xl 2xl:w-4/5 2xl:px-12">
+        <div className="flex w-full flex-col items-center gap-0 2xl:gap-2">
+          <h1 className="text-xl font-bold 2xl:text-3xl">Room: {roomId}</h1>
           <p className="text-muted-foreground text-sm">
             Share this code with friends to let them join
           </p>
@@ -78,7 +78,7 @@ export default function Lobby() {
           <Separator className="mb-5 w-full" />
         </div>
         <div className="min flex w-full items-start justify-between gap-4">
-          <div className="border-accent flex h-[60vh] w-2/5 flex-col gap-2 border-r p-2">
+          <div className="border-accent flex h-120 w-2/5 flex-col gap-2 border-r p-2 2xl:h-[60vh]">
             <p className="text-foreground text-center text-sm font-semibold">
               Click to change set
             </p>
@@ -190,7 +190,7 @@ export default function Lobby() {
 
                 return (
                   <motion.div
-                    className="relative h-200 w-full"
+                    className="relative h-120 w-full 2xl:h-200"
                     style={{ transformStyle: "preserve-3d" }}
                     animate={{ rotateY: showSelector ? 180 : 0 }}
                     transition={{ duration: 0.75, ease: "easeInOut" }}
@@ -231,7 +231,7 @@ export default function Lobby() {
               })()
             )}
           </div>
-          <Chat className="h-192 w-160" />
+          <Chat className="h-120 w-120 2xl:h-192 2xl:w-160" />
         </div>
 
         <div className="mt-5 flex items-center justify-between gap-2">

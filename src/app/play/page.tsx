@@ -163,7 +163,7 @@ export default function PlayPage() {
   // ─── Game is playing ────────────────────────────────────────
   return (
     <div
-      className="flex min-h-screen flex-col items-center justify-center gap-6"
+      className="mt-[10vh] flex max-h-screen min-h-screen flex-col items-center justify-start gap-6 overflow-hidden 2xl:max-h-none"
       style={
         {
           "--accent": accent,
@@ -171,7 +171,7 @@ export default function PlayPage() {
         } as CSSProperties
       }
     >
-      <div className="mt-10 flex w-full max-w-3xl items-center justify-center gap-5 px-4">
+      <div className="flex w-full max-w-3xl items-center justify-center gap-5 px-4">
         <div className="text-3xl font-bold">
           {currentTurnPlayer?.name ?? "—"}
           {roomState.turn === playerId ? " (you)" : ""}
@@ -194,31 +194,34 @@ export default function PlayPage() {
 
       <div className="flex h-full flex-row items-center justify-center">
         <div className="flex w-full gap-5">
-          <div className="flex h-full w-100 flex-col items-center justify-center gap-12">
+          <div className="flex h-full w-60 flex-col items-center justify-center gap-12 2xl:w-100">
             {!myTurn ? (
-              <div className="z-20 flex flex-col items-center justify-center">
+              <div className="z-20 flex max-h-110 flex-col items-center justify-center 2xl:max-h-none">
                 <p className="mb-5 text-xl font-semibold">
                   Character to Guess:
                 </p>
                 <AnimeCharacterInfo
-                  className="bg-background/20 h-full border-[rgb(var(--accent)/0.6)] backdrop-blur-xl"
+                  className="bg-background/20 no-scrollbar h-full max-h-80 overflow-y-auto border-[rgb(var(--accent)/0.6)] backdrop-blur-xl 2xl:max-h-none"
                   character={characterToGuess!}
                 />
               </div>
             ) : (
-              <Instructions className="border-[rgb(var(--accent)/0.6)]2 z-20 h-full w-100" />
+              <Instructions className="border-[rgb(var(--accent)/0.6)]2 z-20 h-80 w-60 2xl:h-full 2xl:w-100" />
             )}
 
-            <div className="flex h-60 flex-col gap-8">
+            <div className="flex h-20 flex-col gap-8">
               <Button
                 variant="game"
                 onClick={(e) => {
                   e.preventDefault();
                   endTurn();
                 }}
-                className={cn("h-24 w-64 text-4xl font-bold", {
-                  hidden: roomState?.turn !== playerId,
-                })}
+                className={cn(
+                  "h-12 w-40 text-xl font-bold 2xl:h-24 2xl:w-64 2xl:text-4xl",
+                  {
+                    hidden: roomState?.turn !== playerId,
+                  },
+                )}
               >
                 END TURN
               </Button>
@@ -228,9 +231,12 @@ export default function PlayPage() {
                   if (!guessedCharacterId) return;
                   send({ type: "makeGuess", characterId: guessedCharacterId });
                 }}
-                className={cn("h-24 w-64 text-4xl font-bold", {
-                  hidden: !canMakeGuess || !guessedCharacterId,
-                })}
+                className={cn(
+                  "h-12 w-40 text-xl font-bold 2xl:h-24 2xl:w-64 2xl:text-4xl",
+                  {
+                    hidden: !canMakeGuess || !guessedCharacterId,
+                  },
+                )}
               >
                 Make Guess
               </Button>
@@ -242,14 +248,14 @@ export default function PlayPage() {
             inGame={true}
             turnChangeToken={roomState.turn ?? undefined}
             turnLabel={currentTurnPlayer?.name ?? "Unknown"}
-            className={cn("h-full rounded-3xl p-2")}
+            className={"h-full max-w-150 rounded-3xl p-2 2xl:max-w-none"}
             myTurn={myTurn}
           />
         </div>
-        <div className="z-20 -ml-18 flex h-192 max-h-192 min-h-0 w-120 flex-col items-stretch gap-2">
+        <div className="z-20 ml-0 flex h-120 min-h-0 w-60 flex-col items-center gap-2 2xl:-ml-18 2xl:h-192 2xl:w-120 2xl:items-stretch">
           <Players className="h-auto max-h-64 w-full shrink-0 overflow-y-auto" />
           <Chat
-            className="bg-background/40 min-h-0 w-100 flex-1 border-[rgb(var(--accent)/0.8)] backdrop-blur-xl"
+            className="bg-background/40 max-h-100 min-h-0 w-60 flex-1 border-[rgb(var(--accent)/0.8)] backdrop-blur-xl 2xl:max-h-none 2xl:w-100"
             accent={accent}
             bgAccent={bgAccent}
           />
@@ -316,7 +322,7 @@ function Instructions({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "border-accent/60 from-background/20 via-background/20 to-muted/20 relative overflow-hidden rounded-2xl border bg-linear-to-br p-5 shadow-lg backdrop-blur-xl",
+        "border-accent/60 from-background/20 via-background/20 to-muted/20 relative overflow-hidden rounded-2xl border bg-linear-to-br p-2 shadow-lg backdrop-blur-xl 2xl:p-5",
         className,
       )}
     >

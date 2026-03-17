@@ -135,7 +135,7 @@ export function CharacterCard({
   const progressDegrees = Math.max(0, Math.min(360, holdProgress * 360));
 
   return (
-    <div className="h-44 w-30 perspective-distant" {...props}>
+    <div className="h-16 w-18 perspective-distant 2xl:h-44 2xl:w-30" {...props}>
       <FollowerPointerCard
         className="z-50 h-full w-full"
         title={char.name}
@@ -172,7 +172,7 @@ export function CharacterCard({
         >
           {holdProgress > 0.05 ? (
             <div
-              className="pointer-events-none absolute -inset-1 rounded-[1.65rem]"
+              className="pointer-events-none absolute -inset-1 z-50 rounded-[1.65rem] 2xl:z-0"
               style={{
                 background: `conic-gradient(from -90deg, rgba(250, 204, 21, 0.95) ${progressDegrees}deg, rgba(250, 204, 21, 0.15) ${progressDegrees}deg 360deg)`,
                 boxShadow: "0 0 18px rgba(250, 204, 21, 0.45)",
@@ -190,7 +190,7 @@ export function CharacterCard({
               className="absolute inset-0 flex items-center justify-center"
               style={{ backfaceVisibility: "hidden" }}
             >
-              <div className="relative h-40 w-28 overflow-hidden rounded-2xl border border-red-200/70 bg-slate-950 shadow-[0_0_0_1px_rgba(251,113,133,0.2),0_10px_24px_rgba(2,6,23,0.45)]">
+              <div className="relative h-24 w-16 overflow-hidden rounded-2xl border border-red-200/70 bg-slate-950 shadow-[0_0_0_1px_rgba(251,113,133,0.2),0_10px_24px_rgba(2,6,23,0.45)] 2xl:h-40 2xl:w-28">
                 <div className="absolute inset-0.5 rounded-xl border border-red-100/25" />
                 <div className="absolute inset-1 rounded-[0.7rem] border border-white/10" />
 
@@ -199,7 +199,7 @@ export function CharacterCard({
                   src={char.image!}
                   width={500}
                   height={800}
-                  className="pointer-events-none h-40 w-28 rounded-2xl object-cover"
+                  className="pointer-events-none h-24 w-16 rounded-2xl object-cover 2xl:h-40 2xl:w-28"
                 />
 
                 <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/30 via-transparent to-white/10" />
@@ -214,7 +214,7 @@ export function CharacterCard({
                 transform: "rotateY(180deg)",
               }}
             >
-              <div className="relative h-40 w-28 overflow-hidden rounded-2xl border border-red-200/65 bg-slate-950 shadow-[0_0_0_1px_rgba(251,191,36,0.25),0_16px_30px_rgba(2,6,23,0.55)]">
+              <div className="relative h-24 w-16 overflow-hidden rounded-2xl border border-red-200/65 bg-slate-950 shadow-[0_0_0_1px_rgba(251,191,36,0.25),0_16px_30px_rgba(2,6,23,0.55)] 2xl:h-40 2xl:w-28">
                 <div className="absolute inset-0.5 rounded-xl bg-linear-to-b from-slate-800 via-slate-900 to-black" />
                 <div className="absolute inset-1 rounded-[0.7rem] border border-red-300/25" />
 
