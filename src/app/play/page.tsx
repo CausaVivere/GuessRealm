@@ -194,17 +194,49 @@ export default function PlayPage() {
 
       <div className="flex h-full flex-row items-center justify-center">
         <div className="flex w-full gap-5">
-          {!myTurn ? (
-            <div className="z-20 flex h-full w-100 flex-col items-center justify-center">
-              <p className="mb-5 text-xl font-semibold">Character to Guess:</p>
-              <AnimeCharacterInfo
-                className="bg-background/20 h-full border-[rgb(var(--accent)/0.6)] backdrop-blur-xl"
-                character={characterToGuess!}
-              />
+          <div className="flex h-full w-100 flex-col items-center justify-center gap-12">
+            {!myTurn ? (
+              <div className="z-20 flex flex-col items-center justify-center">
+                <p className="mb-5 text-xl font-semibold">
+                  Character to Guess:
+                </p>
+                <AnimeCharacterInfo
+                  className="bg-background/20 h-full border-[rgb(var(--accent)/0.6)] backdrop-blur-xl"
+                  character={characterToGuess!}
+                />
+              </div>
+            ) : (
+              <Instructions className="border-[rgb(var(--accent)/0.6)]2 z-20 h-full w-100" />
+            )}
+
+            <div className="flex h-60 flex-col gap-8">
+              <Button
+                variant="game"
+                onClick={(e) => {
+                  e.preventDefault();
+                  endTurn();
+                }}
+                className={cn("h-24 w-64 text-4xl font-bold", {
+                  hidden: roomState?.turn !== playerId,
+                })}
+              >
+                END TURN
+              </Button>
+              <Button
+                variant="game-gold"
+                onClick={() => {
+                  if (!guessedCharacterId) return;
+                  send({ type: "makeGuess", characterId: guessedCharacterId });
+                }}
+                className={cn("h-24 w-64 text-4xl font-bold", {
+                  hidden: !canMakeGuess || !guessedCharacterId,
+                })}
+              >
+                Make Guess
+              </Button>
             </div>
-          ) : (
-            <Instructions className="border-[rgb(var(--accent)/0.6)]2 z-20 h-full w-100" />
-          )}
+          </div>
+
           <SetVisualizer
             set={set}
             inGame={true}
@@ -217,38 +249,11 @@ export default function PlayPage() {
         <div className="z-20 -ml-18 flex h-192 max-h-192 min-h-0 w-120 flex-col items-stretch gap-2">
           <Players className="h-auto max-h-64 w-full shrink-0 overflow-y-auto" />
           <Chat
-            className="bg-background/40 min-h-0 w-full flex-1 border-[rgb(var(--accent)/0.8)] backdrop-blur-xl"
+            className="bg-background/40 min-h-0 w-100 flex-1 border-[rgb(var(--accent)/0.8)] backdrop-blur-xl"
             accent={accent}
             bgAccent={bgAccent}
           />
         </div>
-      </div>
-
-      <div className="flex h-60 gap-8">
-        <Button
-          variant="game-gold"
-          onClick={() => {
-            if (!guessedCharacterId) return;
-            send({ type: "makeGuess", characterId: guessedCharacterId });
-          }}
-          className={cn("h-24 w-64 text-4xl font-bold", {
-            hidden: !canMakeGuess || !guessedCharacterId,
-          })}
-        >
-          Make Guess
-        </Button>
-        <Button
-          variant="game"
-          onClick={(e) => {
-            e.preventDefault();
-            endTurn();
-          }}
-          className={cn("h-24 w-64 text-4xl font-bold", {
-            hidden: roomState?.turn !== playerId,
-          })}
-        >
-          END TURN
-        </Button>
       </div>
 
       <Button
@@ -257,7 +262,7 @@ export default function PlayPage() {
           leaveRoom();
           router.push("/");
         }}
-        className="fixed top-5 left-5 h-12 text-lg"
+        className="fixed top-5 left-5 z-50 h-12 text-lg"
       >
         <ChevronLeft />
         Leave Game

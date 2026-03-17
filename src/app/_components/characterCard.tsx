@@ -12,7 +12,7 @@ import { useParty } from "~/utils/PartyProvider";
 import { cn } from "~/lib/utils";
 import { FollowerPointerCard } from "~/components/ui/following-pointer";
 
-const HOLD_TO_GUESS_MS = 3000;
+const HOLD_TO_GUESS_MS = 1200;
 
 export function CharacterCard({
   char,
@@ -267,11 +267,11 @@ export function CharacterCard({
             </div>
           </motion.div>
 
-          {holdProgress > 0.05 && holdProgress < 1 ? (
+          {/* {holdProgress > 0.05 && holdProgress < 1 ? (
             <div className="pointer-events-none absolute top-1 left-1 rounded-full bg-yellow-500/90 px-1.5 py-0.5 text-[10px] font-semibold text-black">
               {Math.ceil(((1 - holdProgress) * HOLD_TO_GUESS_MS) / 1000)}s
             </div>
-          ) : null}
+          ) : null} */}
         </motion.div>
       </FollowerPointerCard>
     </div>

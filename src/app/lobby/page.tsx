@@ -234,7 +234,7 @@ export default function Lobby() {
           <Chat className="h-192 w-160" />
         </div>
 
-        <div className="mt-5 flex justify-between gap-2">
+        <div className="mt-5 flex items-center justify-between gap-2">
           <Button
             variant="game-danger"
             className="h-12 w-36 text-xl font-semibold"
