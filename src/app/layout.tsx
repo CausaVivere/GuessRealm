@@ -11,7 +11,7 @@ import TailwindIndicator from "./_components/twIndicator";
 import { env } from "~/env";
 
 export const metadata: Metadata = {
-  title: "Guessverse",
+  title: "GuessRealm",
   description: "A multiplayer anime character guessing game",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };

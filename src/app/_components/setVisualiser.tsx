@@ -123,7 +123,7 @@ export default function SetVisualizer({
           <div className="pointer-events-none absolute inset-1 rounded-[1.95rem] border border-red-200/20" />
           <div className="pointer-events-none absolute inset-0 rounded-[2.05rem] bg-linear-to-b from-white/7 via-transparent to-black/25" />
           <div className="pointer-events-none absolute top-2 right-5 text-[9px] font-semibold tracking-[0.26em] text-red-100/80 uppercase">
-            Guessverse - {set.name}
+            GuessRealm - {set.name}
           </div>
 
           <div className="relative grid h-full w-fit grid-cols-6 gap-12 py-6 pr-6 2xl:gap-6 2xl:py-0 2xl:pr-0">
@@ -160,7 +160,7 @@ export default function SetVisualizer({
 
           <div className="relative flex h-full w-full flex-col items-center justify-center gap-5">
             <div className="text-2xl font-semibold tracking-[0.28em] text-red-100/80 uppercase">
-              Guessverse
+              GuessRealm
             </div>
 
             <div className="relative flex h-24 w-24 items-center justify-center rounded-full border border-red-200/45 bg-zinc-900/70">

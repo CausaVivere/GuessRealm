@@ -234,7 +234,7 @@ export function CharacterCard({
                 </div>
 
                 <div className="pointer-events-none absolute inset-x-0 top-4 text-center text-[9px] font-semibold tracking-[0.22em] text-red-100/90 uppercase">
-                  Guessverse
+                  GuessRealm
                 </div>
 
                 <div className="pointer-events-none absolute inset-x-0 bottom-4 z-20 text-center text-[8px] tracking-[0.3em] text-cyan-100/80 uppercase">

@@ -154,7 +154,7 @@ export default function AnimePage() {
                   >
                     <User size={64} />
                     <h3 className="text-center text-2xl font-semibold">
-                      Guessverse
+                      GuessRealm
                     </h3>
                   </div>
                 );
