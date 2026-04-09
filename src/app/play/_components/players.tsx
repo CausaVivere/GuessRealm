@@ -3,15 +3,21 @@ import { useParty } from "~/utils/PartyProvider";
 import { Crown, PlugZap, Skull, Swords, WifiOff } from "lucide-react";
 import type { CSSProperties } from "react";
 import { twColor500ToRgb } from "~/utils/general";
+import type { RoomState } from "../../../../party/types";
 
 export default function Players({
   className,
+  demoState,
   ...props
 }: {
   className?: string;
+  demoState?: RoomState;
 } & React.HTMLAttributes<HTMLDivElement>) {
-  const { roomState, playerId } = useParty();
-  const players = roomState?.players ?? [];
+  let { roomState, playerId } = useParty();
+  const players = demoState ? demoState.players : (roomState?.players ?? []);
+
+  roomState = demoState ?? roomState;
+  playerId = demoState ? "player-3" : playerId;
 
   return (
     <div

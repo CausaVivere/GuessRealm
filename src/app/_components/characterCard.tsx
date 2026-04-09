@@ -11,6 +11,7 @@ import type { AnimeCharacter } from "~/server/api/utils/jikan";
 import { useParty } from "~/utils/PartyProvider";
 import { cn } from "~/lib/utils";
 import { FollowerPointerCard } from "~/components/ui/following-pointer";
+import type { RoomState } from "../../../party/types";
 
 const HOLD_TO_GUESS_MS = 1200;
 
@@ -21,6 +22,7 @@ export function CharacterCard({
   className,
   inGame,
   index,
+  demoState,
   ...props
 }: {
   char: AnimeCharacter;
@@ -28,11 +30,17 @@ export function CharacterCard({
   onGuess?: () => void;
   className?: string;
   inGame?: boolean;
+  demoState?: RoomState;
   index: number;
 } & React.HTMLAttributes<HTMLDivElement>) {
-  const { playerId, roomState } = useParty();
+  let { playerId, roomState } = useParty();
+
+  roomState = demoState ?? roomState;
+  playerId = demoState ? "player-3" : playerId;
+
   const nowPlaying = roomState?.players.find((p) => p.id === roomState.turn);
-  const isTurnt = !inGame ? false : nowPlaying?.turnt.includes(char.id);
+  const isTurnt =
+    !inGame && !demoState ? false : nowPlaying?.turnt.includes(char.id);
 
   const isMyTurn = roomState?.turn === playerId;
   const canInteract = !!inGame && !!isMyTurn && roomState?.status === "playing";

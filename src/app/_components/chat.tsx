@@ -11,6 +11,7 @@ import { Send } from "lucide-react";
 import { useParty } from "~/utils/PartyProvider";
 import { cn } from "~/lib/utils";
 import { twColor500To700Rgb } from "~/utils/general";
+import type { RoomState } from "../../../party/types";
 
 function twColor500ToRgb(color: string): string {
   // These map to Tailwind's default palette (approx), good enough for subtle chat tinting.
@@ -40,15 +41,21 @@ function twColor500ToRgb(color: string): string {
 export default function Chat({
   className,
   accent,
-  bgAccent,
+  demoState,
 }: {
   className?: string;
   accent?: string;
-  bgAccent?: string;
+  demoState?: RoomState;
 }) {
-  const { roomState, connected, playerId, sendMessage, player } = useParty();
+  let { roomState, connected, playerId, sendMessage, player } = useParty();
   const [draft, setDraft] = useState("");
   const scrollerRef = useRef<HTMLDivElement | null>(null);
+
+  roomState = demoState ?? roomState;
+  playerId = demoState ? "player-3" : playerId;
+  player = demoState
+    ? demoState.players.find((p) => p.id === "player-3")!
+    : player;
 
   const playersById = useMemo(() => {
     const map = new Map<string, { name: string; color?: string }>();
@@ -108,7 +115,7 @@ export default function Chat({
         <div className="flex flex-col">
           <div className="text-sm font-semibold">Room chat</div>
           <div className="text-muted-foreground text-xs">
-            {connected ? "Connected" : "Reconnecting…"}
+            {connected || demoState ? "Connected" : "Reconnecting…"}
           </div>
         </div>
         <div className="text-muted-foreground text-xs">
@@ -194,7 +201,7 @@ export default function Chat({
               submit();
             }
           }}
-          placeholder={connected ? "Message…" : "Connecting…"}
+          placeholder={connected || demoState ? "Message…" : "Connecting…"}
           disabled={!connected}
           rows={1}
           className="border-input bg-background focus-visible:ring-ring flex-1 resize-none rounded-xl border px-3 py-2 text-sm outline-none focus-visible:ring-2 disabled:opacity-60"

@@ -17,17 +17,12 @@ import { ChevronLeft } from "lucide-react";
 import AnimeCharacterInfo from "../_components/characterInfo";
 import type { AnimeCharacter } from "~/server/api/utils/jikan";
 import Chat from "../_components/chat";
-import {
-  Crown,
-  MousePointerClick,
-  MessageCircleQuestion,
-  Skull,
-} from "lucide-react";
 import EndScreen from "../_components/endScreen";
 import DrawScreen from "../_components/drawScreen";
 import EliminationScreen from "../_components/eliminationScreen";
 import Players from "./_components/players";
 import { twColor500To700Rgb, twColor500ToRgb } from "~/utils/general";
+import { Instructions } from "./_components/instructions";
 
 export default function PlayPage() {
   const [gameOver, setGameOver] = useState(false);
@@ -116,7 +111,7 @@ export default function PlayPage() {
     return <Loading message="Joining room..." fullScreen />;
   }
 
-  if (!connected || !roomState) {
+  if (!roomState) {
     return <Loading message="Reconnecting to room..." fullScreen />;
   }
 
@@ -133,9 +128,6 @@ export default function PlayPage() {
   }
 
   const set = roomState.set!;
-  const currentTurnPlayer = roomState.players.find(
-    (p) => p.id === roomState.turn,
-  );
 
   const myTurn = roomState.turn === playerId;
   const currentPlayer = roomState.players.find((p) => p.id === roomState.turn);
@@ -171,9 +163,14 @@ export default function PlayPage() {
         } as CSSProperties
       }
     >
+      {!connected && (
+        <div className="fixed top-4 left-1/2 z-50 -translate-x-1/2 rounded-full border border-amber-500/40 bg-amber-500/15 px-4 py-2 text-sm font-medium text-amber-200 backdrop-blur-md">
+          Reconnecting... you can continue once connection is restored.
+        </div>
+      )}
       <div className="flex w-full max-w-3xl items-center justify-center gap-5 px-4">
         <div className="text-3xl font-bold">
-          {currentTurnPlayer?.name ?? "—"}
+          {currentPlayer?.name ?? "—"}
           {roomState.turn === playerId ? " (you)" : ""}
         </div>
         <div className="text-3xl font-bold text-yellow-500">
@@ -247,7 +244,7 @@ export default function PlayPage() {
             set={set}
             inGame={true}
             turnChangeToken={roomState.turn ?? undefined}
-            turnLabel={currentTurnPlayer?.name ?? "Unknown"}
+            turnLabel={currentPlayer?.name ?? "Unknown"}
             className={"h-full max-w-150 rounded-3xl p-2 2xl:max-w-none"}
             myTurn={myTurn}
           />
@@ -257,7 +254,6 @@ export default function PlayPage() {
           <Chat
             className="bg-background/40 max-h-100 min-h-0 w-60 flex-1 border-[rgb(var(--accent)/0.8)] backdrop-blur-xl 2xl:max-h-none 2xl:w-100"
             accent={accent}
-            bgAccent={bgAccent}
           />
         </div>
       </div>
@@ -313,91 +309,6 @@ export default function PlayPage() {
           ></div>
         </div>
         <div className="absolute inset-0 z-0 h-full w-full bg-[radial-gradient(#000000_1px,transparent_1px)] bg-size-[16px_16px]"></div>
-      </div>
-    </div>
-  );
-}
-
-function Instructions({ className }: { className?: string }) {
-  return (
-    <div
-      className={cn(
-        "border-accent/60 from-background/20 via-background/20 to-muted/20 relative overflow-hidden rounded-2xl border bg-linear-to-br p-2 shadow-lg backdrop-blur-xl 2xl:p-5",
-        className,
-      )}
-    >
-      {/* Decorative glow */}
-      <div className="pointer-events-none absolute -top-24 -right-24 h-56 w-56 rounded-full bg-yellow-500/10 blur-3xl" />
-
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="border-accent/60 flex h-11 w-11 items-center justify-center rounded-xl border bg-yellow-500/10">
-            <Crown className="h-5 w-5 text-yellow-500" />
-          </div>
-          <div>
-            <h2 className="text-sm font-semibold tracking-widest text-yellow-500">
-              YOUR TURN
-            </h2>
-            <p className="text-muted-foreground text-xs">
-              Ask smart questions, flip cards fast.
-            </p>
-          </div>
-        </div>
-        <div className="text-muted-foreground border-border/60 bg-background/60 rounded-md border px-2 py-1 text-[11px] backdrop-blur">
-          Round: live
-        </div>
-      </div>
-
-      <div className="mt-4 space-y-3">
-        <div className="border-border/60 bg-background/60 rounded-xl border p-3 backdrop-blur">
-          <div className="mb-1 flex items-center gap-2 text-sm font-medium">
-            <MessageCircleQuestion className="h-4 w-4 text-blue-400" />
-            Use chat to narrow it down
-          </div>
-          <p className="text-muted-foreground text-sm">
-            It's your turn to guess the character! Use the chat to ask questions
-            and narrow down the possibilities.
-          </p>
-          <p className="text-muted-foreground mt-2 text-sm font-bold">
-            YES or NO questions ONLY!
-          </p>
-          <p className="mt-2 text-sm text-blue-400/80">
-            Pro tip: ask about the character's anime, role, or traits to get
-            useful hints from other players.
-          </p>
-        </div>
-        <div className="grid grid-cols-1 gap-3">
-          <div className="border-border/60 bg-background/60 rounded-xl border p-3 backdrop-blur">
-            <div className="mb-1 flex items-center gap-2 text-sm font-medium">
-              <MousePointerClick className="h-4 w-4 text-emerald-400" />
-              Controls
-            </div>
-            <ul className="text-muted-foreground space-y-1 text-sm">
-              <li className="flex items-center gap-2">
-                <span className="text-foreground border-border/70 bg-muted/40 inline-flex items-center rounded-md border px-2 py-0.5 text-[11px] font-medium">
-                  Click
-                </span>
-                <span>turn a character card</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="text-foreground border-border/70 bg-muted/40 inline-flex items-center rounded-md border px-2 py-0.5 text-[11px] font-medium">
-                  Hold click
-                </span>
-                <span>make a guess</span>
-              </li>
-            </ul>
-          </div>
-
-          <div className="rounded-xl border border-red-500/30 bg-red-950/20 p-3">
-            <div className="mb-1 flex items-center gap-2 text-sm font-semibold text-red-300">
-              <Skull className="h-4 w-4" />
-              Sudden death
-            </div>
-            <p className="text-sm text-red-200/80">
-              If you guess wrong, you get eliminated.
-            </p>
-          </div>
-        </div>
       </div>
     </div>
   );

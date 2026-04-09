@@ -113,14 +113,16 @@ export default function SelectAnimeSet({
           />
         )}
       </div>
-      <Button
-        onClick={() => setIsChangingSet(false)}
-        className="w-full text-lg font-semibold"
-        variant="secondary"
-      >
-        <ChevronLeft className="mr-2" />
-        Go Back
-      </Button>
+      {roomState?.set && (
+        <Button
+          onClick={() => setIsChangingSet(false)}
+          className="w-full text-lg font-semibold"
+          variant="secondary"
+        >
+          <ChevronLeft className="mr-2" />
+          Go Back
+        </Button>
+      )}
     </div>
   );
 }

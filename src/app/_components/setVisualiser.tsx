@@ -7,6 +7,7 @@ import { Crown } from "lucide-react";
 
 import { CharacterCard } from "./characterCard";
 import { twColor500ToRgb } from "~/utils/general";
+import type { RoomState } from "../../../party/types";
 
 const BOARD_FLIP_TO_BACK_SECONDS = 0.6;
 const BOARD_BACK_HOLD_SECONDS = 1.0;
@@ -21,6 +22,7 @@ export default function SetVisualizer({
   turnChangeToken,
   turnLabel,
   myTurn,
+  demoState,
 }: {
   set: AnimeGameSet;
   className?: string;
@@ -28,13 +30,16 @@ export default function SetVisualizer({
   turnChangeToken?: string;
   turnLabel?: string;
   myTurn?: boolean;
+  demoState?: RoomState;
 }) {
-  const { turnCard, send, roomState, player } = useParty();
+  let { turnCard, send, roomState, player } = useParty();
   const prefersReducedMotion = useReducedMotion();
   const boardControls = useAnimationControls();
   const previousTurnRef = useRef<string | undefined>(turnChangeToken);
   const boardRotationRef = useRef(0);
   const animationRunIdRef = useRef(0);
+
+  roomState = demoState ?? roomState;
 
   const currentPlayer = roomState?.players.find(
     (p) => p.id === roomState?.turn,
@@ -141,6 +146,7 @@ export default function SetVisualizer({
                   send({ type: "makeGuess", characterId: char.id })
                 }
                 inGame={inGame}
+                demoState={demoState}
               />
             ))}
           </div>

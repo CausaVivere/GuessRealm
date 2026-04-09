@@ -26,25 +26,32 @@ export async function cacheAnime(animeId: string) {
 
   try {
     const animeData = formatAnime(anime);
-    const connectEntities = (entities: JikanEntity[]) =>
-      entities.map((e) => ({ id: e.mal_id }));
+    const connectEntities = (entities: JikanEntity[], kind: EntityKind) =>
+      entities.map((e) => ({ id: toEntityId(kind, e.mal_id) }));
 
     // Pre-create all JikanEntities so the upsert can just connect to them
-    const allEntities = [
-      ...anime.studios,
-      ...anime.genres,
-      ...anime.explicit_genres,
-      ...anime.themes,
-      ...anime.demographics,
+    const allEntities: { entity: JikanEntity; kind: EntityKind }[] = [
+      ...anime.studios.map((entity) => ({ entity, kind: "studio" as const })),
+      ...anime.genres.map((entity) => ({ entity, kind: "genre" as const })),
+      ...anime.explicit_genres.map((entity) => ({
+        entity,
+        kind: "explicitGenre" as const,
+      })),
+      ...anime.themes.map((entity) => ({ entity, kind: "theme" as const })),
+      ...anime.demographics.map((entity) => ({
+        entity,
+        kind: "demographic" as const,
+      })),
     ];
 
     if (allEntities.length > 0) {
       await db.jikanEntity.createMany({
-        data: allEntities.map((e) => ({
-          id: e.mal_id,
-          name: e.name,
-          type: e.type,
-          url: e.url,
+        data: allEntities.map(({ entity, kind }) => ({
+          id: toEntityId(kind, entity.mal_id),
+          name: entity.name,
+          // Persist our normalized category so DB rows remain internally consistent.
+          type: kind,
+          url: entity.url,
         })),
         skipDuplicates: true,
       });
@@ -54,20 +61,28 @@ export async function cacheAnime(animeId: string) {
       where: { id: anime.mal_id },
       update: {
         ...animeData,
-        studios: { set: connectEntities(anime.studios) },
-        genres: { set: connectEntities(anime.genres) },
-        explicitGenres: { set: connectEntities(anime.explicit_genres) },
-        themes: { set: connectEntities(anime.themes) },
-        demographics: { set: connectEntities(anime.demographics) },
+        studios: { set: connectEntities(anime.studios, "studio") },
+        genres: { set: connectEntities(anime.genres, "genre") },
+        explicitGenres: {
+          set: connectEntities(anime.explicit_genres, "explicitGenre"),
+        },
+        themes: { set: connectEntities(anime.themes, "theme") },
+        demographics: {
+          set: connectEntities(anime.demographics, "demographic"),
+        },
       },
       create: {
         id: anime.mal_id,
         ...animeData,
-        studios: { connect: connectEntities(anime.studios) },
-        genres: { connect: connectEntities(anime.genres) },
-        explicitGenres: { connect: connectEntities(anime.explicit_genres) },
-        themes: { connect: connectEntities(anime.themes) },
-        demographics: { connect: connectEntities(anime.demographics) },
+        studios: { connect: connectEntities(anime.studios, "studio") },
+        genres: { connect: connectEntities(anime.genres, "genre") },
+        explicitGenres: {
+          connect: connectEntities(anime.explicit_genres, "explicitGenre"),
+        },
+        themes: { connect: connectEntities(anime.themes, "theme") },
+        demographics: {
+          connect: connectEntities(anime.demographics, "demographic"),
+        },
       },
       include: {
         studios: true,
@@ -85,6 +100,25 @@ export async function cacheAnime(animeId: string) {
       message: "Failed to cache anime",
     });
   }
+}
+
+type EntityKind =
+  | "studio"
+  | "genre"
+  | "explicitGenre"
+  | "theme"
+  | "demographic";
+
+const ENTITY_ID_OFFSET: Record<EntityKind, number> = {
+  studio: 0,
+  genre: 200000000,
+  explicitGenre: 400000000,
+  theme: 600000000,
+  demographic: 800000000,
+};
+
+function toEntityId(kind: EntityKind, malId: number): number {
+  return ENTITY_ID_OFFSET[kind] + malId;
 }
 
 export async function cacheAnimeCharacters(animeId: number) {

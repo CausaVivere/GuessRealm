@@ -34,10 +34,10 @@ export default function Lobby() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!connected) {
+    if (!roomId) {
       router.push("/");
     }
-  }, [connected, router]);
+  }, [roomId, router]);
 
   useEffect(() => {
     if (roomState?.status === "playing") {
@@ -57,16 +57,17 @@ export default function Lobby() {
     }
   }, []);
 
-  if (!connected) {
-    return <Loading message="Connecting to room..." fullScreen />;
-  }
-
   if (!roomState) {
-    return <Loading message="Loading room..." fullScreen />;
+    return <Loading message="Connecting to room..." fullScreen />;
   }
 
   return (
     <div className="flex min-h-screen w-full flex-col items-center justify-center">
+      {!connected && (
+        <div className="fixed top-4 left-1/2 z-50 -translate-x-1/2 rounded-full border border-amber-500/40 bg-amber-500/15 px-4 py-2 text-sm font-medium text-amber-200 backdrop-blur-md">
+          Reconnecting... gameplay state is preserved.
+        </div>
+      )}
       <div className="border-accent w-full flex-col items-center justify-center gap-6 rounded-4xl border px-5 pt-5 pb-12 backdrop-blur-xl 2xl:w-4/5 2xl:px-12">
         <div className="flex w-full flex-col items-center gap-0 2xl:gap-2">
           <h1 className="text-xl font-bold 2xl:text-3xl">Room: {roomId}</h1>

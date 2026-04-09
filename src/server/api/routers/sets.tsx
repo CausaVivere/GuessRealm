@@ -101,14 +101,28 @@ export const setRouter = createTRPCRouter({
   getAnimeCharacters: protectedProcedure
     .input(z.object({ animeId: z.string() }))
     .mutation(async ({ ctx, input }) => {
+      // Refresh anime metadata each time so relation fixes and upstream updates propagate.
+      await cacheAnime(input.animeId);
+
       const characters = await ctx.db.animeCharacter.findMany({
         where: { animeId: parseInt(input.animeId) },
       });
 
       if (characters.length > 0) return characters;
 
-      // else cache
-      const anime = await cacheAnime(input.animeId);
+      // else cache character roster
+      const anime = await ctx.db.anime.findUnique({
+        where: { id: parseInt(input.animeId) },
+        select: { id: true },
+      });
+
+      if (!anime) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Anime not found after refresh",
+        });
+      }
+
       return await cacheAnimeCharacters(anime.id);
     }),
   createAnimeSet: protectedProcedure
@@ -199,6 +213,39 @@ export const setRouter = createTRPCRouter({
         take: input.limit ?? 20,
       });
       return data;
+    }),
+  getSpecificAnimeSet: publicProcedure
+    .input(
+      z.object({
+        setId: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const set = await ctx.db.animeGameset.findUnique({
+        where: { id: input.setId },
+        include: {
+          characters: {
+            include: {
+              voiceActors: true,
+              anime: {
+                include: {
+                  genres: true,
+                  explicitGenres: true,
+                  demographics: true,
+                  themes: true,
+                },
+              },
+            },
+          },
+        },
+      });
+      if (!set) {
+        throw new TRPCError({
+          message: "Anime set not found.",
+          code: "NOT_FOUND",
+        });
+      }
+      return set;
     }),
 });
 
