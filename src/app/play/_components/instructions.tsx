@@ -19,9 +19,6 @@ export function Instructions({ className }: { className?: string }) {
 
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="border-accent/60 flex h-11 w-11 items-center justify-center rounded-xl border bg-yellow-500/10">
-            <Crown className="h-5 w-5 text-yellow-500" />
-          </div>
           <div>
             <h2 className="text-sm font-semibold tracking-widest text-yellow-500">
               YOUR TURN
@@ -30,9 +27,6 @@ export function Instructions({ className }: { className?: string }) {
               Ask smart questions, flip cards fast.
             </p>
           </div>
-        </div>
-        <div className="text-muted-foreground border-border/60 bg-background/60 rounded-md border px-2 py-1 text-[11px] backdrop-blur">
-          Round: live
         </div>
       </div>
 

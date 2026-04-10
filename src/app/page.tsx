@@ -99,8 +99,8 @@ export default function HomePage() {
         GuessRealm.
       </h1>
 
-      <div className="bg-background/40 m-8 flex min-h-[75vh] w-full flex-col items-center justify-start gap-6 rounded-xl p-8 pt-26 backdrop-blur-sm md:w-fit">
-        <div className="bg-background relative flex w-fit flex-col items-center justify-center gap-6 rounded-xl p-8">
+      <div className="bg-background/40 m-8 mb-96 flex min-h-[75vh] w-full flex-col items-center justify-start gap-6 rounded-xl pb-26 backdrop-blur-sm md:w-fit">
+        <div className="bg-background relative mt-20 mb-16 flex w-fit flex-col items-center justify-center gap-6 rounded-xl p-8">
           <LightRays className="opacity-50" />
           <Input
             placeholder="Your name"
@@ -140,28 +140,44 @@ export default function HomePage() {
             Create Room
           </Button>
         </div>
-        <div className="flex w-full flex-col gap-8 p-8">
-          <h2 className="text-2xl font-semibold">How to Play?</h2>
-          <p className="text-muted-foreground text-lg leading-7">
-            GuessRealm is a multiplayer guessing game where you compete against
-            friends to identify characters from various anime series. Create or
-            join a room, select a character set, and get ready for a fun and
-            challenging experience.
-          </p>
+        <div className="relative inline-flex w-full flex-col self-center">
+          <Image
+            src="/assets/2.jpg"
+            alt="Background"
+            fill
+            className="pointer-events-none h-fit overflow-hidden object-cover object-center mix-blend-overlay"
+          />
+          <div className="relative inline-grid w-full grid-cols-2 items-center justify-center gap-0">
+            <div></div>
+            <div className="bg-background/50 flex h-52 flex-col gap-1 p-8 backdrop-blur-sm">
+              <h2 className="text-2xl font-semibold">GuessRealm?</h2>
+              <p className="max-w-3xl text-xl leading-7">
+                GuessRealm is a multiplayer guessing game where you compete
+                against friends to identify characters from various anime
+                series. Create or join a room, select a character set, and get
+                ready for a fun and challenging experience.
+              </p>
+            </div>
+          </div>
+          <div className="relative mt-0 inline-grid w-full grid-cols-2 items-center justify-center">
+            <div className="bg-background/50 flex h-52 flex-col gap-1 p-8 backdrop-blur-sm">
+              <h2 className="text-2xl font-semibold">How to Play?</h2>
+              <p className="max-w-3xl text-xl">
+                Each player gets assigned a unique character to guess.
+              </p>
+              <p className="max-w-3xl text-xl">
+                Players take turns asking yes/no questions to narrow down the
+                possibilities.
+              </p>
+              <p className="max-w-3xl text-xl">
+                The first player to guess their character correctly wins the
+                round.
+              </p>
+            </div>
+            <div></div>
+          </div>
         </div>
-        <div className="flex w-full flex-col gap-1 p-8">
-          <p className="text-xl">
-            Each player gets assigned a unique character to guess.
-          </p>
-          <p className="text-xl">
-            Players take turns asking yes/no questions to narrow down the
-            possibilities.
-          </p>
-          <p className="text-xl">
-            The first player to guess their character correctly wins the round.
-          </p>
-        </div>
-        <DemoSection />
+        <DemoSection className="mx-8" />
       </div>
     </div>
   );

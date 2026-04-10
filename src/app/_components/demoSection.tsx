@@ -28,17 +28,68 @@ import SetVisualizer from "./setVisualiser";
 import Players from "../play/_components/players";
 import Chat from "./chat";
 import { set } from "zod";
+import { cn } from "~/lib/utils";
 
-export default function DemoSection() {
+export default function DemoSection({ className }: { className?: string }) {
   const [demoState, setDemoState] = useState<RoomState | null>(null);
   const [round, setRound] = useState(1);
-  const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [isInView, setIsInView] = useState(false);
+  const scheduledActionsRef = useRef<
+    Array<{
+      id: ReturnType<typeof setTimeout>;
+      dueAt: number;
+      run: () => void;
+    }>
+  >([]);
+  const pausedActionsRef = useRef<
+    Array<{ remainingMs: number; run: () => void }>
+  >([]);
   const lastPlayedRoundRef = useRef<number | null>(null);
 
   const clearScheduledActions = useCallback(() => {
-    timeoutsRef.current.forEach((id) => clearTimeout(id));
-    timeoutsRef.current = [];
+    scheduledActionsRef.current.forEach(({ id }) => clearTimeout(id));
+    scheduledActionsRef.current = [];
   }, []);
+
+  const scheduleAction = useCallback((delayMs: number, run: () => void) => {
+    const dueAt = Date.now() + Math.max(0, delayMs);
+
+    const id = setTimeout(
+      () => {
+        scheduledActionsRef.current = scheduledActionsRef.current.filter(
+          (action) => action.id !== id,
+        );
+        run();
+      },
+      Math.max(0, delayMs),
+    );
+
+    scheduledActionsRef.current.push({ id, dueAt, run });
+  }, []);
+
+  const pauseScheduledActions = useCallback(() => {
+    const now = Date.now();
+    pausedActionsRef.current = scheduledActionsRef.current.map(
+      ({ dueAt, run }) => ({
+        remainingMs: Math.max(0, dueAt - now),
+        run,
+      }),
+    );
+
+    clearScheduledActions();
+  }, [clearScheduledActions]);
+
+  const resumeScheduledActions = useCallback(() => {
+    const paused = pausedActionsRef.current;
+    if (paused.length === 0) return;
+
+    paused.forEach(({ remainingMs, run }) => {
+      scheduleAction(remainingMs, run);
+    });
+
+    pausedActionsRef.current = [];
+  }, [scheduleAction]);
 
   const { data: demoSet } = api.sets.getSpecificAnimeSet.useQuery(
     {
@@ -63,8 +114,40 @@ export default function DemoSection() {
   }, [demoSet, clearScheduledActions]);
 
   useEffect(() => {
+    const node = containerRef.current;
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (!entry) return;
+        setIsInView(entry.isIntersecting);
+      },
+      {
+        threshold: 0.7,
+      },
+    );
+
+    observer.observe(node);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isInView) {
+      resumeScheduledActions();
+      return;
+    }
+
+    pauseScheduledActions();
+  }, [isInView, pauseScheduledActions, resumeScheduledActions]);
+
+  useEffect(() => {
     return () => {
       clearScheduledActions();
+      pausedActionsRef.current = [];
     };
   }, [clearScheduledActions]);
 
@@ -93,49 +176,39 @@ export default function DemoSection() {
       });
 
       roundData.chat.forEach((msg, i) => {
-        const id = setTimeout(
-          () => {
-            if (msg) {
-              setDemoState((prev) => {
-                if (!prev) return prev;
-                return {
-                  ...prev,
-                  chat: [...prev.chat, msg],
-                };
-              });
-            }
-          },
-          chatStartOffsetMs + i * messageDelayMs,
-        );
-
-        timeoutsRef.current.push(id);
+        scheduleAction(chatStartOffsetMs + i * messageDelayMs, () => {
+          if (msg) {
+            setDemoState((prev) => {
+              if (!prev) return prev;
+              return {
+                ...prev,
+                chat: [...prev.chat, msg],
+              };
+            });
+          }
+        });
       });
 
       roundData.charactersToTurn.forEach((characterTurn, i) => {
-        const id = setTimeout(
-          () => {
-            if (characterTurn) {
-              setDemoState((prev) => {
-                if (!prev) return prev;
-                return {
-                  ...prev,
-                  players: prev.players.map((p) => {
-                    if (p.id === roundData.turn) {
-                      return {
-                        ...p,
-                        turnt: [...p.turnt, characterTurn],
-                      };
-                    }
-                    return p;
-                  }),
-                };
-              });
-            }
-          },
-          turnsStartOffsetMs + i * turnDelayMs,
-        );
-
-        timeoutsRef.current.push(id);
+        scheduleAction(turnsStartOffsetMs + i * turnDelayMs, () => {
+          if (characterTurn) {
+            setDemoState((prev) => {
+              if (!prev) return prev;
+              return {
+                ...prev,
+                players: prev.players.map((p) => {
+                  if (p.id === roundData.turn) {
+                    return {
+                      ...p,
+                      turnt: [...p.turnt, characterTurn],
+                    };
+                  }
+                  return p;
+                }),
+              };
+            });
+          }
+        });
       });
 
       const lastTurnOffsetMs =
@@ -147,22 +220,22 @@ export default function DemoSection() {
       const nextRound = roundNumber + 1;
 
       if (rounds[nextRound as keyof typeof rounds]) {
-        const id = setTimeout(() => {
+        scheduleAction(totalRoundMs, () => {
           setRound(nextRound);
-        }, totalRoundMs);
-        timeoutsRef.current.push(id);
+        });
       }
     },
-    [clearScheduledActions],
+    [clearScheduledActions, scheduleAction],
   );
 
   useEffect(() => {
+    if (!isInView) return;
     if (!demoState) return;
     if (lastPlayedRoundRef.current === round) return;
 
     playRound(round);
     lastPlayedRoundRef.current = round;
-  }, [demoState, round, playRound]);
+  }, [isInView, demoState, round, playRound]);
 
   const currentPlayer = demoState?.players.find(
     (p) => p.id === demoState?.turn,
@@ -177,15 +250,21 @@ export default function DemoSection() {
 
   if (!demoState || !demoSet) {
     return (
-      <div className="flex min-h-110 w-full items-center justify-center rounded-xl">
-        <Loading message="Loading demo..." />
+      <div ref={containerRef} className={cn("w-full", className)}>
+        <div className="flex min-h-110 w-full items-center justify-center rounded-xl">
+          <Loading message="Loading demo..." />
+        </div>
       </div>
     );
   }
 
   return (
     <div
-      className="flex h-full flex-row items-center justify-center"
+      ref={containerRef}
+      className={cn(
+        "flex h-full flex-row items-center justify-center",
+        className,
+      )}
       style={
         {
           "--accent": accent,

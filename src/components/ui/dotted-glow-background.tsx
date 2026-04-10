@@ -253,7 +253,7 @@ export const DottedGlowBackground = ({
       for (let i = 0; i < dots.length; i++) {
         const d = dots[i];
         // Linear triangle wave 0..1..0 for linear glow/dim
-        const mod = (time * d.speed + d.phase) % 2;
+        const mod = (time * (d?.speed ?? 0) + (d?.phase ?? 0)) % 2;
         const lin = mod < 1 ? mod : 2 - mod; // 0..1..0
         const a = 0.25 + 0.55 * lin; // 0.25..0.8 linearly
 
@@ -269,7 +269,7 @@ export const DottedGlowBackground = ({
 
         ctx.globalAlpha = a * opacity;
         ctx.beginPath();
-        ctx.arc(d.x, d.y, radius, 0, Math.PI * 2);
+        ctx.arc(d?.x ?? 0, d?.y ?? 0, radius, 0, Math.PI * 2);
         ctx.fill();
       }
       ctx.restore();
