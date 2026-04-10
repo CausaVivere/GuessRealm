@@ -80,9 +80,11 @@ export default function Lobby() {
         </div>
         <div className="min flex w-full items-start justify-between gap-4">
           <div className="border-accent flex h-120 w-2/5 flex-col gap-2 border-r p-2 2xl:h-[60vh]">
-            <p className="text-foreground text-center text-sm font-semibold">
-              Click to change set
-            </p>
+            {isHost ?? (
+              <p className="text-foreground text-center text-sm font-semibold">
+                Click to change set
+              </p>
+            )}
             {roomState?.set ? (
               <div
                 className="border-muted mb-5 flex h-24 w-full flex-row gap-3 rounded-xl border px-5 py-2 hover:cursor-pointer hover:bg-zinc-700"

@@ -163,11 +163,11 @@ export default function PlayPage() {
         } as CSSProperties
       }
     >
-      {!connected && (
+      {/* {!connected && (
         <div className="fixed top-4 left-1/2 z-50 -translate-x-1/2 rounded-full border border-amber-500/40 bg-amber-500/15 px-4 py-2 text-sm font-medium text-amber-200 backdrop-blur-md">
           Reconnecting... you can continue once connection is restored.
         </div>
-      )}
+      )} */}
       <div className="flex w-full max-w-3xl items-center justify-center gap-5 px-4">
         <div className="text-3xl font-bold">
           {currentPlayer?.name ?? "—"}
