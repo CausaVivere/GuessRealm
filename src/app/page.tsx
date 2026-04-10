@@ -21,6 +21,7 @@ import type { AnimeCharacter } from "~/server/api/utils/jikan";
 import type { RoomState } from "../../party/types";
 import { twColor500To700Rgb, twColor500ToRgb } from "~/utils/general";
 import DemoSection from "./_components/demoSection";
+import { SpinningText } from "~/components/ui/spinning-text";
 
 export default function HomePage() {
   const {
@@ -77,7 +78,7 @@ export default function HomePage() {
       <div className="fixed inset-0 select-none">
         <BubbleBackground
           interactive={true}
-          className="absolute inset-0 -z-10 flex items-center justify-center rounded-xl opacity-90"
+          className="absolute inset-0 -z-10 flex items-center justify-center opacity-90"
           colors={{
             first: "196,120,255",
             second: "168,85,247",
@@ -95,12 +96,12 @@ export default function HomePage() {
           className="pointer-events-none -z-10 object-cover object-center mix-blend-overlay"
         />
       </div>
-      <h1 className="z-10 mt-26 rounded-xl px-4 py-2 text-4xl font-bold backdrop-blur-sm lg:text-7xl">
+      <h1 className="z-10 my-36 rounded-xl px-4 py-2 text-4xl font-bold backdrop-blur-sm lg:text-7xl">
         GuessRealm.
       </h1>
 
-      <div className="bg-background/40 m-8 mb-96 flex min-h-[75vh] w-full flex-col items-center justify-start gap-6 rounded-xl pb-26 backdrop-blur-sm md:w-fit">
-        <div className="bg-background relative mt-20 mb-16 flex w-fit flex-col items-center justify-center gap-6 rounded-xl p-8">
+      <div className="bg-background/40 mb-42 flex min-h-[75vh] w-full flex-col items-center justify-start rounded-xl pb-26 backdrop-blur-sm md:w-fit">
+        <div className="bg-background relative flex w-full flex-col items-center justify-center gap-6 rounded-xl p-8">
           <LightRays className="opacity-50" />
           <Input
             placeholder="Your name"
@@ -125,7 +126,7 @@ export default function HomePage() {
               Join
             </Button>
           </div>
-          <div className="select-none2 flex w-30 items-center justify-center gap-4">
+          <div className="flex w-30 items-center justify-center gap-4 select-none">
             <Separator className="bg-white/50" />
             <span className="text-muted-foreground shrink-0 text-lg italic">
               or
@@ -148,10 +149,18 @@ export default function HomePage() {
             className="pointer-events-none h-fit overflow-hidden object-cover object-center mix-blend-overlay"
           />
           <div className="relative inline-grid w-full grid-cols-2 items-center justify-center gap-0">
-            <div></div>
-            <div className="bg-background/50 flex h-52 flex-col gap-1 p-8 backdrop-blur-sm">
+            <div>
+              <Image
+                src="/assets/nyan.png"
+                alt="nyan"
+                width={500}
+                height={500}
+                className="h-60 w-full object-cover object-center mix-blend-overlay"
+              />
+            </div>
+            <div className="bg-background/50 flex h-60 flex-col gap-1 p-8 backdrop-blur-sm">
               <h2 className="text-2xl font-semibold">GuessRealm?</h2>
-              <p className="max-w-3xl text-xl leading-7">
+              <p className="max-w-3xl text-base leading-7 lg:text-lg xl:text-xl">
                 GuessRealm is a multiplayer guessing game where you compete
                 against friends to identify characters from various anime
                 series. Create or join a room, select a character set, and get
@@ -160,24 +169,109 @@ export default function HomePage() {
             </div>
           </div>
           <div className="relative mt-0 inline-grid w-full grid-cols-2 items-center justify-center">
-            <div className="bg-background/50 flex h-52 flex-col gap-1 p-8 backdrop-blur-sm">
+            <div className="bg-background/50 flex h-60 flex-col gap-1 p-8 backdrop-blur-sm">
               <h2 className="text-2xl font-semibold">How to Play?</h2>
-              <p className="max-w-3xl text-xl">
+              <p className="max-w-3xl text-base leading-7 lg:text-lg xl:text-xl">
                 Each player gets assigned a unique character to guess.
               </p>
-              <p className="max-w-3xl text-xl">
+              <p className="max-w-3xl text-base leading-7 lg:text-lg xl:text-xl">
                 Players take turns asking yes/no questions to narrow down the
                 possibilities.
               </p>
-              <p className="max-w-3xl text-xl">
+              <p className="max-w-3xl text-base leading-7 lg:text-lg xl:text-xl">
                 The first player to guess their character correctly wins the
                 round.
               </p>
             </div>
-            <div></div>
+            <div>
+              <Image
+                src="/assets/tomie.png"
+                alt="tomie"
+                width={500}
+                height={500}
+                className="h-60 w-full object-cover object-center mix-blend-overlay"
+              />
+            </div>
           </div>
         </div>
-        <DemoSection className="mx-8" />
+        <DemoSection className="mx-8 mt-20" />
+
+        {/* Powered by section */}
+        <div className="mt-36 flex flex-col items-center justify-center gap-6">
+          <span className="mb-16 text-4xl">Powered by </span>
+          <div className="flex gap-10">
+            <a
+              href="https://jikan.moe/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline transition hover:scale-110"
+            >
+              <Image
+                src="/jikan.svg"
+                alt="jikan"
+                width={500}
+                height={500}
+                className="h-20 object-contain"
+              />
+            </a>
+            <a
+              href="https://myanimelist.net"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="relative inline-block underline transition hover:scale-110"
+            >
+              <Image
+                src="/mal.png"
+                alt="myanimelist"
+                width={500}
+                height={500}
+                className="h-20 object-contain"
+              />
+              <div
+                className="pointer-events-none absolute inset-0 bg-cyan-400/80 mix-blend-screen"
+                style={{
+                  WebkitMaskImage: "url('/mal.png')",
+                  maskImage: "url('/mal.png')",
+                  WebkitMaskRepeat: "no-repeat",
+                  maskRepeat: "no-repeat",
+                  WebkitMaskPosition: "center",
+                  maskPosition: "center",
+                  WebkitMaskSize: "contain",
+                  maskSize: "contain",
+                }}
+              />
+            </a>
+          </div>
+        </div>
+      </div>
+      {/* footer */}
+      <div className="relative z-20 flex min-h-72 w-full items-center justify-between gap-4 bg-black p-8 text-center text-xl text-white">
+        <LightRays />
+        <SpinningText className="w-62">
+          Made by • Causa Vivere • for you •
+        </SpinningText>
+        <div className="flex flex-col items-center gap-2">
+          <span className="text-center text-4xl">
+            Check out the project on github:
+          </span>
+          <a
+            href="https://github.com/CausaVivere/Guessverse"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline transition hover:scale-110"
+          >
+            <Image
+              src="/github.svg"
+              alt="github"
+              width={500}
+              height={500}
+              className="h-20 object-contain"
+            />
+          </a>
+        </div>
+        <SpinningText className="w-62">
+          Made by • Causa Vivere • for you •
+        </SpinningText>
       </div>
     </div>
   );

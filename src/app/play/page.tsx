@@ -155,7 +155,7 @@ export default function PlayPage() {
   // ─── Game is playing ────────────────────────────────────────
   return (
     <div
-      className="mt-[10vh] flex max-h-screen min-h-screen flex-col items-center justify-start gap-6 overflow-hidden 2xl:max-h-none"
+      className="flex max-h-screen min-h-screen flex-col items-center justify-start gap-6 overflow-hidden pt-[10vh] 2xl:max-h-none"
       style={
         {
           "--accent": accent,

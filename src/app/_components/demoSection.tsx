@@ -251,7 +251,7 @@ export default function DemoSection({ className }: { className?: string }) {
   if (!demoState || !demoSet) {
     return (
       <div ref={containerRef} className={cn("w-full", className)}>
-        <div className="flex min-h-110 w-full items-center justify-center rounded-xl">
+        <div className="flex min-h-200 w-full min-w-430 items-center justify-center rounded-xl">
           <Loading message="Loading demo..." />
         </div>
       </div>
