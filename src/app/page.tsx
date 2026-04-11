@@ -146,10 +146,10 @@ export default function HomePage() {
             src="/assets/2.jpg"
             alt="Background"
             fill
-            className="pointer-events-none h-fit overflow-hidden object-cover object-center mix-blend-overlay"
+            className="pointer-events-none h-fit overflow-hidden object-cover object-center mix-blend-overlay select-none"
           />
           <div className="relative inline-grid w-full grid-cols-2 items-center justify-center gap-0">
-            <div>
+            <div className="pointer-events-none select-none">
               <Image
                 src="/assets/nyan.png"
                 alt="nyan"
@@ -162,28 +162,30 @@ export default function HomePage() {
               <h2 className="text-2xl font-semibold">GuessRealm?</h2>
               <p className="max-w-3xl text-base leading-7 lg:text-lg xl:text-xl">
                 GuessRealm is a multiplayer guessing game where you compete
-                against friends to identify characters from various anime
-                series. Create or join a room, select a character set, and get
-                ready for a fun and challenging experience.
+                against friends to try and guess your assigned character from
+                anime and manga series. Create or join a room, select a
+                character set, and get ready for a fun and challenging
+                experience.
               </p>
             </div>
           </div>
           <div className="relative mt-0 inline-grid w-full grid-cols-2 items-center justify-center">
-            <div className="bg-background/50 flex h-60 flex-col gap-1 p-8 backdrop-blur-sm">
+            <div className="bg-background/50 flex h-60 flex-col gap-1 px-8 pt-4 backdrop-blur-sm 2xl:pt-8">
               <h2 className="text-2xl font-semibold">How to Play?</h2>
               <p className="max-w-3xl text-base leading-7 lg:text-lg xl:text-xl">
                 Each player gets assigned a unique character to guess.
               </p>
               <p className="max-w-3xl text-base leading-7 lg:text-lg xl:text-xl">
                 Players take turns asking yes/no questions to narrow down the
-                possibilities.
+                possibilities. Only one question can be asked per turn, so
+                choose wisely!
               </p>
               <p className="max-w-3xl text-base leading-7 lg:text-lg xl:text-xl">
                 The first player to guess their character correctly wins the
-                round.
+                round. Guess wrong and you get eliminated!
               </p>
             </div>
-            <div>
+            <div className="pointer-events-none select-none">
               <Image
                 src="/assets/tomie.png"
                 alt="tomie"
@@ -211,7 +213,7 @@ export default function HomePage() {
                 alt="jikan"
                 width={500}
                 height={500}
-                className="h-20 object-contain"
+                className="pointer-events-none h-20 object-contain select-none"
               />
             </a>
             <a
@@ -225,7 +227,7 @@ export default function HomePage() {
                 alt="myanimelist"
                 width={500}
                 height={500}
-                className="h-20 object-contain"
+                className="pointer-events-none h-20 object-contain select-none"
               />
               <div
                 className="pointer-events-none absolute inset-0 bg-cyan-400/80 mix-blend-screen"
@@ -247,9 +249,15 @@ export default function HomePage() {
       {/* footer */}
       <div className="relative z-20 flex min-h-72 w-full items-center justify-between gap-4 bg-black p-8 text-center text-xl text-white">
         <LightRays />
-        <SpinningText className="w-62">
-          Made by • Causa Vivere • for you •
-        </SpinningText>
+        <div className="pointer-events-none w-62 select-none">
+          <Image
+            src="/logo.png"
+            alt="GuessRealm Logo"
+            width={500}
+            height={200}
+          />
+        </div>
+
         <div className="flex flex-col items-center gap-2">
           <span className="text-center text-4xl">
             Check out the project on github:
@@ -265,10 +273,11 @@ export default function HomePage() {
               alt="github"
               width={500}
               height={500}
-              className="h-20 object-contain"
+              className="pointer-events-none h-20 object-contain select-none"
             />
           </a>
         </div>
+
         <SpinningText className="w-62">
           Made by • Causa Vivere • for you •
         </SpinningText>

@@ -11,7 +11,9 @@ export type ClientMessage =
   | { type: "guess"; characterId: number }
   | { type: "endTurn" }
   | { type: "makeGuess"; characterId: number }
-  | { type: "sendMessage"; message: string };
+  | { type: "sendMessage"; message: string }
+  | { type: "kick"; playerId: string }
+  | { type: "ban"; playerId: string };
 
 // Messages sent FROM the server TO clients
 export type ServerMessage =
@@ -19,7 +21,7 @@ export type ServerMessage =
   | { type: "player-joined"; player: Player }
   | { type: "player-left"; playerId: string }
   | { type: "game-started" }
-  | { type: "error"; message: string }
+  | { type: "error"; message: string; code?: string }
   | { type: "correct-guess"; winner: string }
   | {
       type: "last-player-standing";
@@ -33,7 +35,9 @@ export type ServerMessage =
       characterId?: number;
       playerId?: string;
       playerName?: string;
-    };
+    }
+  | { type: "kicked"; playerId: string }
+  | { type: "banned"; playerId: string };
 
 export type Player = {
   id: string; // stable player ID (generated client-side, persisted in sessionStorage)
@@ -49,6 +53,7 @@ export type Player = {
 
 export type RoomState = {
   players: Player[];
+  banned: string[]; // list of player IDs that are banned from joining
   hostId: string | null; // stable player ID of the host
   status: "waiting" | "playing" | "finished";
   set: AnimeGameSet | null;
@@ -76,7 +81,7 @@ export type Message = {
 export const playerColors = [
   "red-500",
   "blue-500",
-  "violet-500",
+  "indigo-500",
   "yellow-500",
   "purple-500",
   "orange-500",

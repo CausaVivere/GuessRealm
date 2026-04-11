@@ -155,7 +155,7 @@ export default function PlayPage() {
   // ─── Game is playing ────────────────────────────────────────
   return (
     <div
-      className="flex max-h-screen min-h-screen flex-col items-center justify-start gap-6 overflow-hidden pt-[10vh] 2xl:max-h-none"
+      className="short:max-h-screen flex max-h-screen min-h-screen flex-col items-center justify-start gap-6 overflow-hidden pt-[10vh]"
       style={
         {
           "--accent": accent,
@@ -189,21 +189,21 @@ export default function PlayPage() {
         </div>
       </div>
 
-      <div className="flex h-full flex-row items-center justify-center">
+      <div className="flex h-full flex-row items-start justify-center">
         <div className="flex w-full gap-5">
           <div className="flex h-full w-60 flex-col items-center justify-center gap-12 2xl:w-100">
             {!myTurn ? (
-              <div className="z-20 flex max-h-110 flex-col items-center justify-center 2xl:max-h-none">
+              <div className="short:max-h-110 z-20 flex max-h-110 flex-col items-center justify-center 2xl:max-h-none">
                 <p className="mb-5 text-xl font-semibold">
                   Character to Guess:
                 </p>
                 <AnimeCharacterInfo
-                  className="bg-background/20 no-scrollbar h-full max-h-80 overflow-y-auto border-[rgb(var(--accent)/0.6)] backdrop-blur-xl 2xl:max-h-none"
+                  className="bg-background/20 no-scrollbar short:max-h-80 h-full max-h-80 overflow-y-auto border-[rgb(var(--accent)/0.6)] backdrop-blur-xl 2xl:max-h-none"
                   character={characterToGuess!}
                 />
               </div>
             ) : (
-              <Instructions className="border-[rgb(var(--accent)/0.6)]2 z-20 h-80 w-60 2xl:h-full 2xl:w-100" />
+              <Instructions className="border-[rgb(var(--accent)/0.6)]2 short:h-80 z-20 h-80 w-60 2xl:h-full 2xl:w-100" />
             )}
 
             <div className="flex h-20 flex-col gap-8">
@@ -214,7 +214,7 @@ export default function PlayPage() {
                   endTurn();
                 }}
                 className={cn(
-                  "h-12 w-40 text-xl font-bold 2xl:h-24 2xl:w-64 2xl:text-4xl",
+                  "short:h-12 short:text-xl h-12 w-40 text-xl font-bold 2xl:h-24 2xl:w-64 2xl:text-4xl",
                   {
                     hidden: roomState?.turn !== playerId,
                   },
@@ -229,7 +229,7 @@ export default function PlayPage() {
                   send({ type: "makeGuess", characterId: guessedCharacterId });
                 }}
                 className={cn(
-                  "h-12 w-40 text-xl font-bold 2xl:h-24 2xl:w-64 2xl:text-4xl",
+                  "short:h-12 short:text-xl h-12 w-40 text-xl font-bold 2xl:h-24 2xl:w-64 2xl:text-4xl",
                   {
                     hidden: !canMakeGuess || !guessedCharacterId,
                   },
@@ -249,7 +249,7 @@ export default function PlayPage() {
             myTurn={myTurn}
           />
         </div>
-        <div className="z-20 ml-0 flex h-120 min-h-0 w-60 flex-col items-center gap-2 2xl:-ml-18 2xl:h-192 2xl:w-120 2xl:items-stretch">
+        <div className="short:h-120 z-20 mt-6 ml-0 flex h-120 min-h-0 w-60 flex-col items-center gap-2 2xl:-ml-18 2xl:h-192 2xl:w-120 2xl:items-stretch">
           <Players className="h-auto max-h-64 w-full shrink-0 overflow-y-auto" />
           <Chat
             className="bg-background/40 max-h-100 min-h-0 w-60 flex-1 border-[rgb(var(--accent)/0.8)] backdrop-blur-xl 2xl:max-h-none 2xl:w-100"

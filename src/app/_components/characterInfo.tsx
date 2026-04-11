@@ -13,6 +13,20 @@ export default function AnimeCharacterInfo({
 } & React.HTMLAttributes<HTMLDivElement>) {
   const anime = character?.anime;
 
+  if (!character) {
+    return (
+      <div
+        className={cn(
+          "border-accent flex flex-col gap-5 rounded-xl border p-5",
+          className,
+        )}
+        {...props}
+      >
+        <p>Character not found</p>
+      </div>
+    );
+  }
+
   if (!anime) {
     return (
       <div
@@ -24,7 +38,7 @@ export default function AnimeCharacterInfo({
       >
         <div className="flex items-center gap-4">
           <Image
-            alt={character.name}
+            alt={character.name ?? "Character Image"}
             src={character.image!}
             width={150}
             height={300}

@@ -9,11 +9,26 @@ import { Separator } from "~/components/ui/separator";
 import { cn } from "~/lib/utils";
 import { useParty } from "~/utils/PartyProvider";
 import SetVisualizer from "../_components/setVisualiser";
-import { Crown, Video } from "lucide-react";
+import {
+  Cog,
+  Crown,
+  Gavel,
+  Settings,
+  SquareArrowRightExit,
+  Video,
+} from "lucide-react";
 import Chat from "../_components/chat";
 import { motion, useReducedMotion } from "framer-motion";
 import SelectAnimeSet from "./_components/selectAnimeSet";
 import { twColor500ToRgb } from "~/utils/general";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "~/components/animate-ui/components/radix/dropdown-menu";
 
 export default function Lobby() {
   const [changingSet, setIsChangingSet] = useState(false);
@@ -27,6 +42,7 @@ export default function Lobby() {
     isHost,
     leaveRoom,
     startGame,
+    send,
   } = useParty();
 
   const prefersReducedMotion = useReducedMotion();
@@ -62,15 +78,17 @@ export default function Lobby() {
   }
 
   return (
-    <div className="flex min-h-screen w-full flex-col items-center justify-center">
-      {!connected && (
+    <div className="flex max-h-screen min-h-screen w-full flex-col items-center justify-center overflow-hidden">
+      {/* {!connected && (
         <div className="fixed top-4 left-1/2 z-50 -translate-x-1/2 rounded-full border border-amber-500/40 bg-amber-500/15 px-4 py-2 text-sm font-medium text-amber-200 backdrop-blur-md">
           Reconnecting... gameplay state is preserved.
         </div>
-      )}
+      )} */}
       <div className="border-accent w-full flex-col items-center justify-center gap-6 rounded-4xl border px-5 pt-5 pb-12 backdrop-blur-xl 2xl:w-4/5 2xl:px-12">
         <div className="flex w-full flex-col items-center gap-0 2xl:gap-2">
-          <h1 className="text-xl font-bold 2xl:text-3xl">Room: {roomId}</h1>
+          <h1 className="short:text-xl text-xl font-bold 2xl:text-3xl">
+            Room: {roomId}
+          </h1>
           <p className="text-muted-foreground text-sm">
             Share this code with friends to let them join
           </p>
@@ -103,7 +121,13 @@ export default function Lobby() {
                     className="h-20 w-20 rounded-lg"
                   />
                 ) : (
-                  <div> </div>
+                  <Image
+                    alt={"GuessRealm logo"}
+                    src="/logo.png"
+                    width={500}
+                    height={500}
+                    className="h-20 w-20 rounded-lg"
+                  />
                 )}
                 <div className="h-full w-full">
                   <h3 className="text-xl font-semibold">
@@ -156,6 +180,55 @@ export default function Lobby() {
                 {player.id === roomState.hostId && (
                   <span className="text-base text-yellow-500">★ Host</span>
                 )}
+
+                {isHost && player.id !== roomState.hostId && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger>
+                      <Settings className="text-muted-foreground h-6 w-6 transition hover:scale-110 hover:cursor-pointer hover:text-white" />
+                    </DropdownMenuTrigger>
+
+                    <DropdownMenuContent className="bg-background/30 backdrop-blur-sm">
+                      <DropdownMenuLabel
+                        style={
+                          {
+                            "--player-rgb": twColor500ToRgb(player.color),
+                          } as CSSProperties
+                        }
+                        className="text-lg text-[rgb(var(--player-rgb))]"
+                      >
+                        {player.name}
+                      </DropdownMenuLabel>
+                      <DropdownMenuGroup>
+                        <DropdownMenuItem
+                          className="hover:cursor-pointer"
+                          onClick={() =>
+                            send({ type: "kick", playerId: player.id })
+                          }
+                        >
+                          <span>
+                            <SquareArrowRightExit className="mr-3 inline-block h-4 w-3" />
+                            Kick
+                          </span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="hover:cursor-pointer"
+                          onClick={() =>
+                            send({ type: "ban", playerId: player.id })
+                          }
+                        >
+                          <span>
+                            <Gavel className="mr-3 inline-block h-4 w-3" />
+                            Ban
+                          </span>
+                        </DropdownMenuItem>
+                        {/* <DropdownMenuItem>
+                          <span>Mute</span>
+                        </DropdownMenuItem> */}
+                      </DropdownMenuGroup>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+
                 {!player.connected && (
                   <span className="text-xs text-red-400">disconnected</span>
                 )}
@@ -193,7 +266,7 @@ export default function Lobby() {
 
                 return (
                   <motion.div
-                    className="relative h-120 w-full 2xl:h-200"
+                    className="short:h-120 relative h-120 w-full 2xl:h-200"
                     style={{ transformStyle: "preserve-3d" }}
                     animate={{ rotateY: showSelector ? 180 : 0 }}
                     transition={{ duration: 0.75, ease: "easeInOut" }}
@@ -234,7 +307,7 @@ export default function Lobby() {
               })()
             )}
           </div>
-          <Chat className="h-120 w-120 2xl:h-192 2xl:w-160" />
+          <Chat className="short:h-120 short:w-120 h-120 w-120 2xl:h-192 2xl:w-160" />
         </div>
 
         <div className="mt-5 flex items-center justify-between gap-2">
@@ -248,7 +321,7 @@ export default function Lobby() {
           {isHost && roomState.status === "waiting" && (
             <Button
               variant="game-gold"
-              className="h-20 w-96 text-3xl font-bold"
+              className="short:h-16 h-20 w-96 text-3xl font-bold"
               onClick={() => startGame()}
             >
               Start Game
@@ -257,7 +330,7 @@ export default function Lobby() {
           {roomState.status === "playing" && (
             <Button
               variant="game"
-              className="h-20 w-96 text-3xl font-bold"
+              className="short:h-16 h-20 w-96 text-3xl font-bold"
               onClick={() => router.push("/play")}
             >
               Go to Game

@@ -14,6 +14,8 @@ export const metadata: Metadata = {
   title: "GuessRealm",
   description: "A multiplayer anime character guessing game",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
+  manifest: "/site.webmanifest",
+  themeColor: "#5800a6",
 };
 
 const geist = Geist({

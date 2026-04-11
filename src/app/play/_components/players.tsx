@@ -1,9 +1,27 @@
 import { cn } from "~/lib/utils";
 import { useParty } from "~/utils/PartyProvider";
-import { Crown, PlugZap, Skull, Swords, WifiOff } from "lucide-react";
+import {
+  Cog,
+  Crown,
+  Gavel,
+  PlugZap,
+  Settings,
+  Skull,
+  SquareArrowRightExit,
+  Swords,
+  WifiOff,
+} from "lucide-react";
 import type { CSSProperties } from "react";
 import { twColor500ToRgb } from "~/utils/general";
 import type { RoomState } from "../../../../party/types";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuGroup,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "~/components/animate-ui/components/radix/dropdown-menu";
 
 export default function Players({
   className,
@@ -13,7 +31,7 @@ export default function Players({
   className?: string;
   demoState?: RoomState;
 } & React.HTMLAttributes<HTMLDivElement>) {
-  let { roomState, playerId } = useParty();
+  let { roomState, playerId, isHost: amIHost, send } = useParty();
   const players = demoState ? demoState.players : (roomState?.players ?? []);
 
   roomState = demoState ?? roomState;
@@ -79,6 +97,50 @@ export default function Players({
                   ) : null}
                 </div>
               </div>
+
+              {amIHost && !isHost && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger>
+                    <Settings className="text-muted-foreground h-4 w-4 transition hover:scale-110 hover:cursor-pointer hover:text-white" />
+                  </DropdownMenuTrigger>
+
+                  <DropdownMenuContent className="bg-background/30 backdrop-blur-sm">
+                    <DropdownMenuLabel
+                      style={
+                        {
+                          "--player-rgb": twColor500ToRgb(p.color),
+                        } as CSSProperties
+                      }
+                      className="text-lg text-[rgb(var(--player-rgb))]"
+                    >
+                      {p.name}
+                    </DropdownMenuLabel>
+                    <DropdownMenuGroup>
+                      <DropdownMenuItem
+                        className="hover:cursor-pointer"
+                        onClick={() => send({ type: "kick", playerId: p.id })}
+                      >
+                        <span>
+                          <SquareArrowRightExit className="mr-3 inline-block h-4 w-3" />
+                          Kick
+                        </span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="hover:cursor-pointer"
+                        onClick={() => send({ type: "ban", playerId: p.id })}
+                      >
+                        <span>
+                          <Gavel className="mr-3 inline-block h-4 w-3" />
+                          Ban
+                        </span>
+                      </DropdownMenuItem>
+                      {/* <DropdownMenuItem>
+                          <span>Mute</span>
+                        </DropdownMenuItem> */}
+                    </DropdownMenuGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
 
               <div>
                 {/* {status === "active" ? (

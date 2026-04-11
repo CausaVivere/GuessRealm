@@ -21,6 +21,7 @@ type ConnectionMap = Map<string, string>;
 export default class GameRoom implements Party.Server {
   state: RoomState = {
     players: [],
+    banned: [],
     hostId: null,
     status: "waiting",
     set: null,
@@ -82,8 +83,13 @@ export default class GameRoom implements Party.Server {
       case "makeGuess":
         this.handleMakeGuess(sender, msg.characterId);
         break;
-      case "guess":
-        // TODO: handle guess logic
+      case "kick":
+        this.handleKick(sender, msg.playerId);
+        break;
+      case "ban":
+        this.handleBan(sender, msg.playerId);
+        break;
+      default:
         break;
     }
   }
@@ -122,16 +128,7 @@ export default class GameRoom implements Party.Server {
       (p) => p.connected && !p.eliminated,
     );
     // If the disconnected player was still in the game, check if we need to end or advance the turn
-    if (remaining.length === 1 && this.state.status === "playing") {
-      const lastPlayer = remaining[0]!;
-      this.state.winnerId = lastPlayer.id;
-      this.state.players = this.state.players.map((p) =>
-        p.id === lastPlayer.id ? { ...p, score: p.score + 1 } : p,
-      );
-      this.broadcast({ type: "room-state", state: this.state });
-      this.delayRestart();
-      return;
-    }
+    if (this.onlyOnePlayerLeft()) return;
 
     if (this.state.turn === playerId) {
       this.advanceTurn();
@@ -146,6 +143,17 @@ export default class GameRoom implements Party.Server {
 
   // ─── Handlers ────────────────────────────────────────────────
   private handleJoin(conn: Party.Connection, playerId: string, name: string) {
+    // Check if player is banned
+    if (this.state.banned.includes(playerId)) {
+      this.send(conn, {
+        type: "error",
+        message: "You are banned from joining this room",
+        code: "BANNED",
+      });
+      this.connections.delete(conn.id);
+      return;
+    }
+
     // Track this connection → player mapping
     this.connections.set(conn.id, playerId);
 
@@ -540,6 +548,64 @@ export default class GameRoom implements Party.Server {
     }
   }
 
+  private handleKick(
+    conn: Party.Connection,
+    targetPlayerId: string,
+    noMsg: boolean = false,
+  ) {
+    const playerId = this.connections.get(conn.id);
+    if (playerId !== this.state.hostId) {
+      return;
+    }
+
+    const targetPlayer = this.state.players.find(
+      (p) => p.id === targetPlayerId,
+    );
+    if (!targetPlayer) {
+      return;
+    }
+
+    this.state.players = this.state.players.filter(
+      (p) => p.id !== targetPlayerId,
+    );
+    this.broadcast({ type: "room-state", state: this.state });
+
+    const targetConn = this.room.getConnection(targetPlayer.connectionId);
+    if (targetConn && !noMsg) {
+      this.send(targetConn, {
+        type: "kicked",
+        playerId: targetPlayerId,
+      });
+    }
+
+    this.onlyOnePlayerLeft();
+  }
+
+  private handleBan(conn: Party.Connection, targetPlayerId: string) {
+    const playerId = this.connections.get(conn.id);
+    if (playerId !== this.state.hostId) {
+      return;
+    }
+
+    const targetPlayer = this.state.players.find(
+      (p) => p.id === targetPlayerId,
+    );
+    if (!targetPlayer) {
+      return;
+    }
+
+    const targetConn = this.room.getConnection(targetPlayer.connectionId);
+    if (targetConn) {
+      this.send(targetConn, {
+        type: "banned",
+        playerId: targetPlayerId,
+      });
+    }
+
+    this.state.banned.push(targetPlayerId);
+    this.handleKick(conn, targetPlayerId, true);
+  }
+
   // ─── Helpers ─────────────────────────────────────────────────
   private send(conn: Party.Connection, msg: ServerMessage) {
     conn.send(JSON.stringify(msg));
@@ -572,6 +638,7 @@ export default class GameRoom implements Party.Server {
 
   private resetRoomState() {
     this.state.players = [];
+    this.state.banned = [];
     this.state.hostId = null;
     this.state.status = "waiting";
     this.state.set = null;
@@ -589,6 +656,25 @@ export default class GameRoom implements Party.Server {
     if (!this.state.gameStartedAt) return false;
     const elapsed = Date.now() - this.state.gameStartedAt;
     return elapsed >= this.state.maxGameDurationMs;
+  }
+
+  private onlyOnePlayerLeft() {
+    const remaining = this.state.players.filter(
+      (p) => p.connected && !p.eliminated,
+    );
+    // If the disconnected player was still in the game, check if we need to end or advance the turn
+    if (remaining.length === 1 && this.state.status === "playing") {
+      const lastPlayer = remaining[0]!;
+      this.state.winnerId = lastPlayer.id;
+      this.state.players = this.state.players.map((p) =>
+        p.id === lastPlayer.id ? { ...p, score: p.score + 1 } : p,
+      );
+      this.broadcast({ type: "room-state", state: this.state });
+      this.delayRestart();
+      return true;
+    }
+
+    return false;
   }
 
   private endAsDraw(reason: "turn-limit" | "time-limit") {

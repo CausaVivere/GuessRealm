@@ -143,7 +143,10 @@ export function CharacterCard({
   const progressDegrees = Math.max(0, Math.min(360, holdProgress * 360));
 
   return (
-    <div className="h-16 w-18 perspective-distant 2xl:h-44 2xl:w-30" {...props}>
+    <div
+      className="short:h-16 short:w-18 h-16 w-18 perspective-distant 2xl:h-44 2xl:w-30"
+      {...props}
+    >
       <FollowerPointerCard
         className="z-50 h-full w-full"
         title={char.name}
@@ -198,7 +201,7 @@ export function CharacterCard({
               className="absolute inset-0 flex items-center justify-center"
               style={{ backfaceVisibility: "hidden" }}
             >
-              <div className="relative h-24 w-16 overflow-hidden rounded-2xl border border-red-200/70 bg-slate-950 shadow-[0_0_0_1px_rgba(251,113,133,0.2),0_10px_24px_rgba(2,6,23,0.45)] 2xl:h-40 2xl:w-28">
+              <div className="short:h-24 short:w-16 relative h-24 w-16 overflow-hidden rounded-2xl border border-red-200/70 bg-slate-950 shadow-[0_0_0_1px_rgba(251,113,133,0.2),0_10px_24px_rgba(2,6,23,0.45)] 2xl:h-40 2xl:w-28">
                 <div className="absolute inset-0.5 rounded-xl border border-red-100/25" />
                 <div className="absolute inset-1 rounded-[0.7rem] border border-white/10" />
 
@@ -207,7 +210,7 @@ export function CharacterCard({
                   src={char.image!}
                   width={500}
                   height={800}
-                  className="pointer-events-none h-24 w-16 rounded-2xl object-cover 2xl:h-40 2xl:w-28"
+                  className="short:h-24 short:w-16 pointer-events-none h-24 w-16 rounded-2xl object-cover 2xl:h-40 2xl:w-28"
                 />
 
                 <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/30 via-transparent to-white/10" />
@@ -222,30 +225,41 @@ export function CharacterCard({
                 transform: "rotateY(180deg)",
               }}
             >
-              <div className="relative h-24 w-16 overflow-hidden rounded-2xl border border-red-200/65 bg-slate-950 shadow-[0_0_0_1px_rgba(251,191,36,0.25),0_16px_30px_rgba(2,6,23,0.55)] 2xl:h-40 2xl:w-28">
+              <div className="short:h-24 short:w-16 relative h-24 w-16 overflow-hidden rounded-2xl border border-red-200/65 bg-slate-950 shadow-[0_0_0_1px_rgba(251,191,36,0.25),0_16px_30px_rgba(2,6,23,0.55)] 2xl:h-40 2xl:w-28">
                 <div className="absolute inset-0.5 rounded-xl bg-linear-to-b from-slate-800 via-slate-900 to-black" />
                 <div className="absolute inset-1 rounded-[0.7rem] border border-red-300/25" />
 
                 <div className="absolute -top-10 -left-7 h-24 w-24 rounded-full bg-cyan-300/15 blur-xl" />
                 <div className="absolute -right-10 -bottom-8 h-28 w-28 rounded-full bg-red-300/20 blur-xl" />
 
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.35)_1px,transparent_0)] bg-size-[8px_8px] opacity-35" />
+                {/* <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.35)_1px,transparent_0)] bg-size-[8px_8px] opacity-35" /> */}
+                <Image
+                  src="/assets/12.jpg"
+                  alt="Background"
+                  fill
+                  className="pointer-events-none h-fit overflow-hidden object-cover object-center opacity-50 mix-blend-overlay select-none"
+                />
 
                 <div className="absolute inset-2 rounded-lg border border-white/15">
                   {/* Center Logo */}
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="relative flex h-16 w-16 items-center justify-center rounded-full border border-white/25 bg-slate-900/75">
-                      <div className="absolute inset-1 rounded-full border border-red-200/40" />
-                      <User2 className="relative h-8 w-8 text-red-100/90" />
+                    <div className="relative flex h-12 w-12 items-center justify-center rounded-full border border-white/25 bg-slate-900/30">
+                      <Image
+                        src="/logo.png"
+                        alt="Logo"
+                        width={500}
+                        height={500}
+                        className="pointer-events-none w-full object-contain opacity-80"
+                      />
                     </div>
                   </div>
                 </div>
 
-                <div className="pointer-events-none absolute inset-x-0 top-4 text-center text-[9px] font-semibold tracking-[0.22em] text-red-100/90 uppercase">
+                <div className="pointer-events-none absolute inset-x-0 top-4 text-center text-[9px] font-semibold tracking-[0.22em] text-red-200 uppercase">
                   GuessRealm
                 </div>
 
-                <div className="pointer-events-none absolute inset-x-0 bottom-4 z-20 text-center text-[8px] tracking-[0.3em] text-cyan-100/80 uppercase">
+                <div className="pointer-events-none absolute inset-x-0 bottom-4 z-20 text-center text-[8px] tracking-[0.3em] text-cyan-100 uppercase">
                   {char.name.split(",")[0]}
                 </div>
 

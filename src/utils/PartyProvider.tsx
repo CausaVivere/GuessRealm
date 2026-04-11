@@ -20,6 +20,7 @@ import type {
 import { useLocalStorage } from "./hooks";
 import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { set } from "zod";
 
 const PARTYKIT_HOST = process.env.NEXT_PUBLIC_PARTYKIT_HOST ?? "localhost:1999";
 
@@ -228,6 +229,29 @@ export function PartyProvider({ children }: { children: ReactNode }) {
           case "error":
             setError(msg.message);
             toast.error(msg.message);
+            if (msg.code === "BANNED") {
+              router.push("/");
+              setRoomId(null);
+              setConnected(false);
+              setLastSetId(null);
+              setRoomState(null);
+            }
+            break;
+          case "kicked":
+            toast.error("You have been kicked from the room.");
+            router.push("/");
+            setRoomId(null);
+            setConnected(false);
+            setLastSetId(null);
+            setRoomState(null);
+            break;
+          case "banned":
+            toast.error("You have been banned from the room.");
+            router.push("/");
+            setRoomId(null);
+            setConnected(false);
+            setLastSetId(null);
+            setRoomState(null);
             break;
         }
       } catch {
@@ -251,6 +275,9 @@ export function PartyProvider({ children }: { children: ReactNode }) {
     if (roomState?.status === "playing" && pathname !== "/play") {
       router.push("/play");
     }
+    // if (!roomState?.players.some((p) => p.id === playerId)) {
+    //   router.push("/");
+    // }
     setIsHost(roomState?.hostId === playerId);
     console.log("Room state changed:", roomState, pathname);
   }, [roomState]);

@@ -64,43 +64,109 @@ export default function SelectAnimeSet({
             className="h-full w-full"
           />
         ) : sets && sets.length > 0 ? (
-          sets.map((s) => (
+          <>
             <div
-              key={s.id}
               className={cn(
                 "group relative flex h-24 shrink-0 flex-row gap-3 overflow-hidden rounded-xl border border-red-200/25 bg-zinc-900/60 px-5 py-2 transition-all duration-300 hover:cursor-pointer hover:border-red-200/55 hover:bg-zinc-800/80",
-                roomState?.set?.id === s.id
+                roomState?.set?.id === "randomized"
                   ? "border-red-400/80 bg-red-500/15"
                   : "",
               )}
               onClick={(e) => {
                 e.preventDefault();
-                if (roomState?.set?.id === s.id) {
+                if (roomState?.set?.id === "randomized") {
                   toast.error("This set is already selected!");
                   return;
                 }
-                selectSet(s.id);
+                selectSet("randomized");
               }}
             >
               <div className="pointer-events-none absolute inset-0 bg-linear-to-r from-transparent via-white/4 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-              {s.img ? (
-                <Image
-                  alt={s.name + "photo"}
-                  src={s.img}
-                  width={500}
-                  height={500}
-                  className="h-20 w-20 rounded-lg border border-white/20 object-cover"
-                />
-              ) : (
-                <div> </div>
-              )}
+
+              <Image
+                alt={"GuessRealm Logo"}
+                src="/logo.png"
+                width={500}
+                height={500}
+                className="h-20 w-20 rounded-lg border border-white/20 object-cover"
+              />
               <div className="h-full w-full">
-                <h3 className="text-xl font-semibold">{s.name}</h3>
-                <p className="text-lg">By user: {s.creatorName}</p>
-                <p className="text-lg">{s.plays} plays</p>
+                <h3 className="text-xl font-semibold">Randomized set</h3>
+                <p className="text-lg">
+                  A random set generated from all characters in the database.
+                </p>
               </div>
             </div>
-          ))
+            <div
+              className={cn(
+                "group relative flex h-24 shrink-0 flex-row gap-3 overflow-hidden rounded-xl border border-red-200/25 bg-zinc-900/60 px-5 py-2 transition-all duration-300 hover:cursor-pointer hover:border-red-200/55 hover:bg-zinc-800/80",
+                roomState?.set?.id === "random"
+                  ? "border-red-400/80 bg-red-500/15"
+                  : "",
+              )}
+              onClick={(e) => {
+                e.preventDefault();
+                if (roomState?.set?.id === "random") {
+                  toast.error("This set is already selected!");
+                  return;
+                }
+                selectSet("random");
+              }}
+            >
+              <div className="pointer-events-none absolute inset-0 bg-linear-to-r from-transparent via-white/4 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+
+              <Image
+                alt={"GuessRealm Logo"}
+                src="/logo.png"
+                width={500}
+                height={500}
+                className="h-20 w-20 rounded-lg border border-white/20 object-cover"
+              />
+              <div className="h-full w-full">
+                <h3 className="text-xl font-semibold">Random set</h3>
+                <p className="text-lg">
+                  A randomly picked set from the available sets in the database.
+                </p>
+              </div>
+            </div>
+            {sets.map((s) => (
+              <div
+                key={s.id}
+                className={cn(
+                  "group relative flex h-24 shrink-0 flex-row gap-3 overflow-hidden rounded-xl border border-red-200/25 bg-zinc-900/60 px-5 py-2 transition-all duration-300 hover:cursor-pointer hover:border-red-200/55 hover:bg-zinc-800/80",
+                  roomState?.set?.id === s.id
+                    ? "border-red-400/80 bg-red-500/15"
+                    : "",
+                )}
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (roomState?.set?.id === s.id) {
+                    toast.error("This set is already selected!");
+                    return;
+                  }
+                  selectSet(s.id);
+                }}
+              >
+                <div className="pointer-events-none absolute inset-0 bg-linear-to-r from-transparent via-white/4 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                {s.img ? (
+                  <Image
+                    alt={s.name + "photo"}
+                    src={s.img}
+                    width={500}
+                    height={500}
+                    className="h-20 w-20 rounded-lg border border-white/20 object-cover"
+                  />
+                ) : (
+                  <div> </div>
+                )}
+                <div className="h-full w-full">
+                  <h3 className="text-xl font-semibold">{s.name}</h3>
+                  <p className="text-lg">By user: {s.creatorName}</p>
+                  <p className="text-lg">{s.plays} plays</p>
+                </div>
+              </div>
+            ))}
+          </>
         ) : (
           <div className="h-full w-full text-lg font-semibold">
             No character sets found for: {query}

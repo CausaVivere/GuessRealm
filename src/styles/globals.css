@@ -3,6 +3,7 @@
 @import "shadcn/tailwind.css";
 
 @custom-variant dark (&:is(.dark *));
+@custom-variant short (@media (max-height: 1000px));
 
 @theme {
   --font-sans:

@@ -8,6 +8,7 @@ import { Crown } from "lucide-react";
 import { CharacterCard } from "./characterCard";
 import { twColor500ToRgb } from "~/utils/general";
 import type { RoomState } from "../../../party/types";
+import Image from "next/image";
 
 const BOARD_FLIP_TO_BACK_SECONDS = 0.6;
 const BOARD_BACK_HOLD_SECONDS = 1.0;
@@ -131,7 +132,7 @@ export default function SetVisualizer({
             GuessRealm - {set.name}
           </div>
 
-          <div className="relative grid h-full w-fit grid-cols-6 gap-12 py-6 pr-6 2xl:gap-6 2xl:py-0 2xl:pr-0">
+          <div className="short:gap-12 short:py-6 short:pr-6 relative grid h-full w-fit grid-cols-6 gap-12 py-6 pr-6 2xl:gap-6 2xl:py-0 2xl:pr-0">
             {set.characters.map((char, i) => (
               <CharacterCard
                 key={char.id}
@@ -162,8 +163,13 @@ export default function SetVisualizer({
           <div className="absolute inset-1 rounded-[1.95rem] bg-linear-to-b from-zinc-800 via-zinc-900 to-black" />
           <div className="absolute inset-2 rounded-[1.7rem] border border-red-200/35" />
           <div className="absolute inset-4 rounded-[1.45rem] border border-white/12" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.28)_1px,transparent_0)] bg-size-[10px_10px] opacity-30" />
-
+          {/* <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.28)_1px,transparent_0)] bg-size-[10px_10px] opacity-30" /> */}
+          <Image
+            src="/assets/8b.jpg"
+            alt="Background"
+            fill
+            className="pointer-events-none h-fit overflow-hidden object-cover object-center opacity-30 mix-blend-overlay select-none"
+          />
           <div className="relative flex h-full w-full flex-col items-center justify-center gap-5">
             <div className="text-2xl font-semibold tracking-[0.28em] text-red-100/80 uppercase">
               GuessRealm
