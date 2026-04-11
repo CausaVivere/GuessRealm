@@ -16,6 +16,10 @@ export function twColor500ToRgb(color?: string): string {
       return "236 72 153";
     case "teal-500":
       return "20 184 166";
+    case "indigo-500":
+      return "99 102 241";
+    case "emerald-500":
+      return "16 185 129";
     default:
       return "250 204 21"; // yellow fallback
   }
@@ -39,6 +43,10 @@ export function twColor500To700Rgb(color?: string): string {
       return "190 24 93";
     case "teal-500":
       return "15 118 110";
+    case "indigo-500":
+      return "79 70 229";
+    case "emerald-500":
+      return "4 120 87";
     default:
       return "161 98 7"; // yellow-700 fallback
   }

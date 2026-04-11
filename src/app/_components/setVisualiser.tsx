@@ -176,8 +176,13 @@ export default function SetVisualizer({
             </div>
 
             <div className="relative flex h-24 w-24 items-center justify-center rounded-full border border-red-200/45 bg-zinc-900/70">
-              <div className="absolute inset-1 rounded-full border border-white/25" />
-              <Crown className="relative h-10 w-10 text-red-100/90" />
+              <Image
+                src="/logo.png"
+                alt="GuessRealm Logo"
+                width={500}
+                height={500}
+                className="h-24 w-24 rounded-full border border-white/20 object-cover"
+              />
             </div>
 
             <div className="rounded-xl border border-white/20 bg-black/25 px-6 py-3 text-center">

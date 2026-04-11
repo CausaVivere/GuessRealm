@@ -81,7 +81,7 @@ export type Message = {
 export const playerColors = [
   "red-500",
   "blue-500",
-  "indigo-500",
+  "emerald-500",
   "yellow-500",
   "purple-500",
   "orange-500",
