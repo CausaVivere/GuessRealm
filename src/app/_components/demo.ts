@@ -3,6 +3,7 @@ import { playerColors, type RoomState } from "../../../party/types";
 
 export const demoRoomState = (set: AnimeGameSet): RoomState => ({
   turn: "player-1",
+  banned: [],
   status: "playing",
   set,
   turnDurationMs: 120000,
