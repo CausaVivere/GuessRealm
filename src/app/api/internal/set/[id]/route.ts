@@ -47,7 +47,7 @@ export async function GET(
     const randomizedIds = await db.$queryRaw<Array<{ id: number }>>`
       SELECT id
       FROM "AnimeCharacter"
-      WHERE POSITION('questionmark_' IN COALESCE(image, '')) > 0
+      WHERE POSITION('questionmark_' IN COALESCE(image, '')) = 0
       ORDER BY RANDOM()
       LIMIT ${RANDOMIZED_CHARACTER_COUNT}
     `;
