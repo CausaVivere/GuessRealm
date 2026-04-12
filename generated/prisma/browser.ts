@@ -52,3 +52,13 @@ export type AnimeGameset = Prisma.AnimeGamesetModel
  * 
  */
 export type VoiceActor = Prisma.VoiceActorModel
+/**
+ * Model AnalyticsDailyVisit
+ * 
+ */
+export type AnalyticsDailyVisit = Prisma.AnalyticsDailyVisitModel
+/**
+ * Model AnalyticsOnlineSnapshot
+ * 
+ */
+export type AnalyticsOnlineSnapshot = Prisma.AnalyticsOnlineSnapshotModel

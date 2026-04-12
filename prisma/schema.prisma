@@ -108,3 +108,24 @@ model VoiceActor {
     language   String
     characters AnimeCharacter[]
 }
+
+model AnalyticsDailyVisit {
+    date      DateTime @id @db.Date
+    visits    Int      @default(0)
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    @@map("analytics_daily_visits")
+}
+
+model AnalyticsOnlineSnapshot {
+    id          BigInt   @id @default(autoincrement())
+    bucketStart DateTime @map("bucket_start")
+    roomId      String   @map("room_id")
+    playerCount Int      @map("player_count")
+    createdAt   DateTime @default(now()) @map("created_at")
+
+    @@unique([bucketStart, roomId])
+    @@index([bucketStart])
+    @@map("analytics_online_snapshots")
+}

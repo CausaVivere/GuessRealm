@@ -57,7 +57,9 @@ export const ModelName = {
   JikanEntity: 'JikanEntity',
   AnimeCharacter: 'AnimeCharacter',
   AnimeGameset: 'AnimeGameset',
-  VoiceActor: 'VoiceActor'
+  VoiceActor: 'VoiceActor',
+  AnalyticsDailyVisit: 'AnalyticsDailyVisit',
+  AnalyticsOnlineSnapshot: 'AnalyticsOnlineSnapshot'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -171,6 +173,27 @@ export const VoiceActorScalarFieldEnum = {
 } as const
 
 export type VoiceActorScalarFieldEnum = (typeof VoiceActorScalarFieldEnum)[keyof typeof VoiceActorScalarFieldEnum]
+
+
+export const AnalyticsDailyVisitScalarFieldEnum = {
+  date: 'date',
+  visits: 'visits',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AnalyticsDailyVisitScalarFieldEnum = (typeof AnalyticsDailyVisitScalarFieldEnum)[keyof typeof AnalyticsDailyVisitScalarFieldEnum]
+
+
+export const AnalyticsOnlineSnapshotScalarFieldEnum = {
+  id: 'id',
+  bucketStart: 'bucketStart',
+  roomId: 'roomId',
+  playerCount: 'playerCount',
+  createdAt: 'createdAt'
+} as const
+
+export type AnalyticsOnlineSnapshotScalarFieldEnum = (typeof AnalyticsOnlineSnapshotScalarFieldEnum)[keyof typeof AnalyticsOnlineSnapshotScalarFieldEnum]
 
 
 export const SortOrder = {

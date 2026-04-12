@@ -8,6 +8,7 @@ import { ThemeProvider } from "~/components/ui/themeProvider";
 import { Toaster } from "~/components/ui/sonner";
 import { PartyProvider } from "~/utils/PartyProvider";
 import TailwindIndicator from "./_components/twIndicator";
+import VisitTracker from "./_components/visitTracker";
 import { env } from "~/env";
 
 export const metadata: Metadata = {
@@ -36,6 +37,7 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
+            <VisitTracker />
             <Toaster />
             <PartyProvider>{children}</PartyProvider>
             {env.NODE_ENV === "development" && <TailwindIndicator />}

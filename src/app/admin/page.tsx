@@ -20,6 +20,7 @@ import {
   Loader2,
   User,
 } from "lucide-react";
+import Link from "next/link";
 import { cn } from "~/lib/utils";
 import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { useSessionStorage } from "~/utils/hooks";
@@ -83,6 +84,14 @@ export default function AnimePage() {
 
   return (
     <div className="bg-background flex min-h-screen w-full items-center justify-center">
+      <div className="absolute top-4 left-4 z-10 flex gap-2">
+        <Button asChild variant="secondary">
+          <Link href="/admin/dashboard">Dashboard</Link>
+        </Button>
+        <Button asChild variant="secondary">
+          <Link href="/admin/games">Games</Link>
+        </Button>
+      </div>
       <div className="border-foreground flex h-full w-4/5 items-center justify-center rounded-md p-5">
         <div className="flex h-full min-h-screen w-full gap-3">
           {step === "selectAnime" ? (

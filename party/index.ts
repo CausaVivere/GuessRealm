@@ -13,6 +13,7 @@ const INTERNAL_SECRET = process.env.INTERNAL_SECRET ?? "";
 const MAX_PLAYERS = 8;
 const DEFAULT_MAX_GAME_DURATION_MS = 30 * 60 * 1000;
 const DEFAULT_MAX_TURNS = 100;
+const ONLINE_SNAPSHOT_INTERVAL_MS = 60 * 1000;
 
 // Maps connectionId → stable playerId for disconnect handling
 type ConnectionMap = Map<string, string>;
@@ -39,6 +40,8 @@ export default class GameRoom implements Party.Server {
   };
 
   private tickInterval: ReturnType<typeof setInterval> | null = null;
+  private analyticsSnapshotInterval: ReturnType<typeof setInterval> | null =
+    null;
 
   // Track which connection belongs to which player
   connections: ConnectionMap = new Map();
@@ -118,15 +121,13 @@ export default class GameRoom implements Party.Server {
     // PartyKit will hibernate/evict idle rooms; this ensures clean joins.
     if (this.state.players.filter((p) => p.connected).length === 0) {
       this.stopTurnTimer();
+      this.stopAnalyticsSnapshotTimer();
       this.connections.clear();
       this.resetRoomState();
       this.broadcast({ type: "room-state", state: this.state });
       return;
     }
 
-    const remaining = this.state.players.filter(
-      (p) => p.connected && !p.eliminated,
-    );
     // If the disconnected player was still in the game, check if we need to end or advance the turn
     if (this.onlyOnePlayerLeft()) return;
 
@@ -139,6 +140,7 @@ export default class GameRoom implements Party.Server {
 
   onDestroy() {
     this.stopTurnTimer();
+    this.stopAnalyticsSnapshotTimer();
   }
 
   // ─── Handlers ────────────────────────────────────────────────
@@ -169,6 +171,8 @@ export default class GameRoom implements Party.Server {
       existing.connectionId = conn.id;
       existing.connected = true;
       existing.name = name; // allow name updates
+
+      this.ensureAnalyticsSnapshotTimer();
 
       this.broadcast({ type: "room-state", state: this.state });
       return;
@@ -201,6 +205,8 @@ export default class GameRoom implements Party.Server {
       color: this.pickColor(),
     };
     this.state.players.push(player);
+
+    this.ensureAnalyticsSnapshotTimer();
 
     // Broadcast full state so all clients get hostId + players in sync
     this.broadcast({ type: "room-state", state: this.state });
@@ -578,6 +584,7 @@ export default class GameRoom implements Party.Server {
       });
     }
 
+    this.ensureAnalyticsSnapshotTimer();
     this.onlyOnePlayerLeft();
   }
 
@@ -650,6 +657,52 @@ export default class GameRoom implements Party.Server {
     this.state.chat = [];
     this.state.winnerId = null;
     this.state.drawReason = null;
+  }
+
+  private getConnectedPlayersCount() {
+    return this.state.players.filter((p) => p.connected).length;
+  }
+
+  private ensureAnalyticsSnapshotTimer() {
+    const connectedCount = this.getConnectedPlayersCount();
+    if (connectedCount <= 0) {
+      this.stopAnalyticsSnapshotTimer();
+      return;
+    }
+
+    if (this.analyticsSnapshotInterval) return;
+
+    void this.publishOnlineSnapshot();
+    this.analyticsSnapshotInterval = setInterval(() => {
+      void this.publishOnlineSnapshot();
+    }, ONLINE_SNAPSHOT_INTERVAL_MS);
+  }
+
+  private stopAnalyticsSnapshotTimer() {
+    if (!this.analyticsSnapshotInterval) return;
+    clearInterval(this.analyticsSnapshotInterval);
+    this.analyticsSnapshotInterval = null;
+  }
+
+  private async publishOnlineSnapshot() {
+    const connectedCount = this.getConnectedPlayersCount();
+    if (connectedCount <= 0) return;
+
+    try {
+      await fetch(`${APP_URL}/api/internal/analytics/online-snapshot`, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-internal-secret": INTERNAL_SECRET,
+        },
+        body: JSON.stringify({
+          roomId: this.room.id,
+          playerCount: connectedCount,
+        }),
+      });
+    } catch {
+      // Never let analytics affect gameplay.
+    }
   }
 
   private isDrawByGameDuration() {

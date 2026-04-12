@@ -390,7 +390,9 @@ export const ModelName = {
   JikanEntity: 'JikanEntity',
   AnimeCharacter: 'AnimeCharacter',
   AnimeGameset: 'AnimeGameset',
-  VoiceActor: 'VoiceActor'
+  VoiceActor: 'VoiceActor',
+  AnalyticsDailyVisit: 'AnalyticsDailyVisit',
+  AnalyticsOnlineSnapshot: 'AnalyticsOnlineSnapshot'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -406,7 +408,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "post" | "apiTokens" | "anime" | "jikanEntity" | "animeCharacter" | "animeGameset" | "voiceActor"
+    modelProps: "post" | "apiTokens" | "anime" | "jikanEntity" | "animeCharacter" | "animeGameset" | "voiceActor" | "analyticsDailyVisit" | "analyticsOnlineSnapshot"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -928,6 +930,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    AnalyticsDailyVisit: {
+      payload: Prisma.$AnalyticsDailyVisitPayload<ExtArgs>
+      fields: Prisma.AnalyticsDailyVisitFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AnalyticsDailyVisitFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnalyticsDailyVisitPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AnalyticsDailyVisitFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnalyticsDailyVisitPayload>
+        }
+        findFirst: {
+          args: Prisma.AnalyticsDailyVisitFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnalyticsDailyVisitPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AnalyticsDailyVisitFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnalyticsDailyVisitPayload>
+        }
+        findMany: {
+          args: Prisma.AnalyticsDailyVisitFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnalyticsDailyVisitPayload>[]
+        }
+        create: {
+          args: Prisma.AnalyticsDailyVisitCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnalyticsDailyVisitPayload>
+        }
+        createMany: {
+          args: Prisma.AnalyticsDailyVisitCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AnalyticsDailyVisitCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnalyticsDailyVisitPayload>[]
+        }
+        delete: {
+          args: Prisma.AnalyticsDailyVisitDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnalyticsDailyVisitPayload>
+        }
+        update: {
+          args: Prisma.AnalyticsDailyVisitUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnalyticsDailyVisitPayload>
+        }
+        deleteMany: {
+          args: Prisma.AnalyticsDailyVisitDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AnalyticsDailyVisitUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AnalyticsDailyVisitUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnalyticsDailyVisitPayload>[]
+        }
+        upsert: {
+          args: Prisma.AnalyticsDailyVisitUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnalyticsDailyVisitPayload>
+        }
+        aggregate: {
+          args: Prisma.AnalyticsDailyVisitAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAnalyticsDailyVisit>
+        }
+        groupBy: {
+          args: Prisma.AnalyticsDailyVisitGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AnalyticsDailyVisitGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AnalyticsDailyVisitCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AnalyticsDailyVisitCountAggregateOutputType> | number
+        }
+      }
+    }
+    AnalyticsOnlineSnapshot: {
+      payload: Prisma.$AnalyticsOnlineSnapshotPayload<ExtArgs>
+      fields: Prisma.AnalyticsOnlineSnapshotFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AnalyticsOnlineSnapshotFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnalyticsOnlineSnapshotPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AnalyticsOnlineSnapshotFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnalyticsOnlineSnapshotPayload>
+        }
+        findFirst: {
+          args: Prisma.AnalyticsOnlineSnapshotFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnalyticsOnlineSnapshotPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AnalyticsOnlineSnapshotFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnalyticsOnlineSnapshotPayload>
+        }
+        findMany: {
+          args: Prisma.AnalyticsOnlineSnapshotFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnalyticsOnlineSnapshotPayload>[]
+        }
+        create: {
+          args: Prisma.AnalyticsOnlineSnapshotCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnalyticsOnlineSnapshotPayload>
+        }
+        createMany: {
+          args: Prisma.AnalyticsOnlineSnapshotCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AnalyticsOnlineSnapshotCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnalyticsOnlineSnapshotPayload>[]
+        }
+        delete: {
+          args: Prisma.AnalyticsOnlineSnapshotDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnalyticsOnlineSnapshotPayload>
+        }
+        update: {
+          args: Prisma.AnalyticsOnlineSnapshotUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnalyticsOnlineSnapshotPayload>
+        }
+        deleteMany: {
+          args: Prisma.AnalyticsOnlineSnapshotDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AnalyticsOnlineSnapshotUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AnalyticsOnlineSnapshotUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnalyticsOnlineSnapshotPayload>[]
+        }
+        upsert: {
+          args: Prisma.AnalyticsOnlineSnapshotUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnalyticsOnlineSnapshotPayload>
+        }
+        aggregate: {
+          args: Prisma.AnalyticsOnlineSnapshotAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAnalyticsOnlineSnapshot>
+        }
+        groupBy: {
+          args: Prisma.AnalyticsOnlineSnapshotGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AnalyticsOnlineSnapshotGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AnalyticsOnlineSnapshotCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AnalyticsOnlineSnapshotCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1064,6 +1214,27 @@ export const VoiceActorScalarFieldEnum = {
 export type VoiceActorScalarFieldEnum = (typeof VoiceActorScalarFieldEnum)[keyof typeof VoiceActorScalarFieldEnum]
 
 
+export const AnalyticsDailyVisitScalarFieldEnum = {
+  date: 'date',
+  visits: 'visits',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AnalyticsDailyVisitScalarFieldEnum = (typeof AnalyticsDailyVisitScalarFieldEnum)[keyof typeof AnalyticsDailyVisitScalarFieldEnum]
+
+
+export const AnalyticsOnlineSnapshotScalarFieldEnum = {
+  id: 'id',
+  bucketStart: 'bucketStart',
+  roomId: 'roomId',
+  playerCount: 'playerCount',
+  createdAt: 'createdAt'
+} as const
+
+export type AnalyticsOnlineSnapshotScalarFieldEnum = (typeof AnalyticsOnlineSnapshotScalarFieldEnum)[keyof typeof AnalyticsOnlineSnapshotScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -1140,6 +1311,20 @@ export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaM
  * Reference to a field of type 'Boolean'
  */
 export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+/**
+ * Reference to a field of type 'BigInt'
+ */
+export type BigIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BigInt'>
+    
+
+
+/**
+ * Reference to a field of type 'BigInt[]'
+ */
+export type ListBigIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BigInt[]'>
     
 
 
@@ -1258,6 +1443,8 @@ export type GlobalOmitConfig = {
   animeCharacter?: Prisma.AnimeCharacterOmit
   animeGameset?: Prisma.AnimeGamesetOmit
   voiceActor?: Prisma.VoiceActorOmit
+  analyticsDailyVisit?: Prisma.AnalyticsDailyVisitOmit
+  analyticsOnlineSnapshot?: Prisma.AnalyticsOnlineSnapshotOmit
 }
 
 /* Types for Logging */
