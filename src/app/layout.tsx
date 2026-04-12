@@ -44,8 +44,8 @@ export const metadata: Metadata = {
     description: siteDescription,
     images: [
       {
-        url: "/logo.png",
-        alt: "GuessRealm logo",
+        url: "/showcase.png",
+        alt: "GuessRealm gameplay showcase",
       },
     ],
   },
@@ -53,7 +53,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "GuessRealm | Multiplayer Anime Character Guessing Game",
     description: siteDescription,
-    images: ["/logo.png"],
+    images: ["/showcase.png"],
   },
   robots: {
     index: true,
