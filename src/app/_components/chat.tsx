@@ -22,7 +22,7 @@ export default function Chat({
   accent?: string;
   demoState?: RoomState;
 }) {
-  let { roomState, connected, playerId, sendMessage, player } = useParty();
+  let { roomState, playerId, sendMessage, player } = useParty();
   const [draft, setDraft] = useState("");
   const scrollerRef = useRef<HTMLDivElement | null>(null);
 
@@ -89,9 +89,6 @@ export default function Chat({
       >
         <div className="flex flex-col">
           <div className="text-sm font-semibold">Room chat</div>
-          <div className="text-muted-foreground text-xs">
-            {connected || demoState ? "Connected" : "Reconnecting…"}
-          </div>
         </div>
         <div className="text-muted-foreground text-xs">
           {messages.length} message{messages.length === 1 ? "" : "s"}
@@ -176,15 +173,14 @@ export default function Chat({
               submit();
             }
           }}
-          placeholder={connected || demoState ? "Message…" : "Connecting…"}
-          disabled={!connected}
+          placeholder="Message…"
           rows={1}
           className="border-input bg-background focus-visible:ring-ring flex-1 resize-none rounded-xl border px-3 py-2 text-sm outline-none focus-visible:ring-2 disabled:opacity-60"
         />
         <button
           type="button"
           onClick={submit}
-          disabled={!connected || !draft.trim()}
+          disabled={!draft.trim()}
           className="bg-primary text-primary-foreground hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground inline-flex h-10 w-10 items-center justify-center rounded-xl disabled:cursor-not-allowed"
           aria-label="Send message"
         >
