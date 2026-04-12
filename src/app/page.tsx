@@ -117,6 +117,7 @@ export default function HomePage() {
               value={joinCode}
               onChange={(e) => setJoinCode(e.target.value.toLowerCase())}
               className="h-14 w-60 px-5 text-xl md:text-2xl"
+              maxLength={14}
             />
             <Button
               disabled={!playerName.trim() || !joinCode.trim()}

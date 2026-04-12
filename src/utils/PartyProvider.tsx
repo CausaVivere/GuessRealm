@@ -291,7 +291,7 @@ export function PartyProvider({ children }: { children: ReactNode }) {
 
   const joinRoom = useCallback(
     (code: string) => {
-      const id = code.trim().toLowerCase();
+      const id = code.trim().toLowerCase().substring(0, 14);
       setSession(id, playerId, playerName.trim());
       setRoomId(id);
     },

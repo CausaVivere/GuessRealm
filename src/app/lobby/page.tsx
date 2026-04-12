@@ -129,20 +129,33 @@ export default function Lobby() {
                     className="h-20 w-20 rounded-lg"
                   />
                 )}
-                <div className="h-full w-full">
+                <div className="flex h-full w-full flex-col items-start justify-center">
                   <h3 className="text-xl font-semibold">
                     {roomState.set.name}
                   </h3>
-                  <p className="text-lg">
-                    By user: {roomState.set.creatorName}
-                  </p>
-                  <p className="text-lg">{roomState.set.plays} plays</p>
+                  {roomState?.set?.id !== "randomized" && (
+                    <>
+                      {" "}
+                      <p className="text-lg">
+                        By user: {roomState.set.creatorName}
+                      </p>
+                      <p className="text-lg">
+                        {roomState.set.plays} plays
+                      </p>{" "}
+                    </>
+                  )}
                 </div>
               </div>
             ) : (
               <div className="border-muted flex h-24 w-full flex-row items-center justify-center gap-3 rounded-xl border px-5 py-2 hover:cursor-pointer hover:bg-zinc-700">
-                <div className="border-secondary flex h-20 w-20 items-center justify-center rounded-lg border">
-                  <Video />
+                <div className="border-secondary flex h-20 w-26 items-center justify-center rounded-lg border">
+                  <Image
+                    alt={"GuessRealm logo"}
+                    src="/logo.png"
+                    width={500}
+                    height={500}
+                    className="h-20 w-20 rounded-lg"
+                  />
                 </div>
                 <div className="flex h-full w-full items-center">
                   <h3 className="text-base font-semibold">
@@ -152,7 +165,7 @@ export default function Lobby() {
               </div>
             )}
 
-            <h2 className="text-lg font-semibold">
+            <h2 className="mt-6 text-lg font-semibold">
               Players ({roomState.players.filter((p) => p.connected).length}/
               {roomState.players.length})
             </h2>
