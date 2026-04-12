@@ -42,7 +42,6 @@ function SelectCharacters({
   const [characters, setCharacters] = useState<CharacterObject[]>([]);
   const getCharacters = api.sets.getGameCharacters.useMutation({
     onSuccess: (data) => {
-      console.log(data);
       setCharacters(data);
     },
     onError: (err) => {
@@ -95,9 +94,6 @@ function SelectGame({
   const [search, setSearch] = useState("");
 
   const searchGames = api.sets.getGames.useMutation({
-    onSuccess: (data) => {
-      console.log(data);
-    },
     onError: (err) => {
       toast.error("Failed to fetch games from IGDB:", {
         description: err.message,

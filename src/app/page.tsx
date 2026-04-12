@@ -45,11 +45,6 @@ export default function HomePage() {
     if (roomId && connected && roomState) {
       void router.push("/lobby");
     }
-    console.log("HomePage useEffect", {
-      roomId,
-      connected,
-      roomState,
-    });
   }, [roomId, connected, roomState, router]);
 
   if (roomId && connected && roomState) {

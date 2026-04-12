@@ -279,7 +279,6 @@ export function PartyProvider({ children }: { children: ReactNode }) {
     //   router.push("/");
     // }
     setIsHost(roomState?.hostId === playerId);
-    console.log("Room state changed:", roomState, pathname);
   }, [roomState]);
 
   // ─── Actions ─────────────────────────────────────────────────

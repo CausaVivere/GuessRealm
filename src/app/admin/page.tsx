@@ -263,7 +263,6 @@ function SelectCharacters({
         )
         .slice(0, pageSize),
     );
-    console.log(data);
   }, [search]);
 
   return (
@@ -357,7 +356,6 @@ function SelectAnime({
 
   const searchAnimes = api.sets.getAnimes.useMutation({
     onSuccess: (data) => {
-      console.log(data);
       setAnimes(data.data);
     },
     onError: (err) => {

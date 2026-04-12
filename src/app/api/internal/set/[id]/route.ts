@@ -118,8 +118,6 @@ export async function GET(
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  console.log(set.characters.map((c) => c.anime?.title));
-
   return NextResponse.json(set);
 }
 
