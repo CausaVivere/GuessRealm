@@ -166,8 +166,7 @@ export default function Lobby() {
             )}
 
             <h2 className="mt-6 text-lg font-semibold">
-              Players ({roomState.players.filter((p) => p.connected).length}/
-              {roomState.players.length})
+              Players ({roomState.players.filter((p) => p.connected).length}/ 8)
             </h2>
             <Separator />
             {roomState.players.map((player) => (
