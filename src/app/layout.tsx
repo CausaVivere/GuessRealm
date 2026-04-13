@@ -12,11 +12,12 @@ import VisitTracker from "./_components/visitTracker";
 import { env } from "~/env";
 
 const siteName = "GuessRealm";
+const siteUrl = "https://www.guessrealm.fun";
 const siteDescription =
   "GuessRealm is a multiplayer anime character guessing game where players ask yes/no questions, narrow down possibilities, and race to guess their assigned character first.";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(env.NEXT_PUBLIC_APP_URL),
+  metadataBase: new URL(siteUrl),
   title: {
     default: "GuessRealm | Multiplayer Anime Character Guessing Game",
     template: "%s | GuessRealm",
