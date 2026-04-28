@@ -219,7 +219,7 @@ export async function refreshAnimeCharacters(animeId: number) {
     const characterUpserts = characters.map((char) => {
       const image = char.character.images?.jpg?.image_url ?? null;
       const updateData: Prisma.AnimeCharacterUpdateInput = {
-        animeId,
+        // animeId,
         name: char.character.name,
         url: char.character.url,
         role: char.role,
