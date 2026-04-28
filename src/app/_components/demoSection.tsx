@@ -14,7 +14,7 @@ import { useRouter } from "next/navigation";
 import Loading from "~/components/ui/loading";
 import { DottedGlowBackground } from "~/components/ui/dotted-glow-background";
 import { BubbleBackground } from "~/components/animate-ui/components/backgrounds/bubble";
-import Image from "next/image";
+import Image from "~/components/ui/smart-image";
 import { Separator } from "~/components/ui/separator";
 import { LightRays } from "~/components/ui/light-rays";
 

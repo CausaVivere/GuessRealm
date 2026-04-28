@@ -5,7 +5,7 @@ import { ButtonGroup } from "~/components/ui/button-group";
 import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/react";
 import { toast } from "sonner";
-import Image from "next/image";
+import Image from "~/components/ui/smart-image";
 import { ChevronRight, Gamepad2 } from "lucide-react";
 import { cn } from "~/lib/utils";
 

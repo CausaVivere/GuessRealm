@@ -8,7 +8,7 @@ import { Crown } from "lucide-react";
 import { CharacterCard } from "./characterCard";
 import { twColor500ToRgb } from "~/utils/general";
 import type { RoomState } from "../../../party/types";
-import Image from "next/image";
+import Image from "~/components/ui/smart-image";
 
 const BOARD_FLIP_TO_BACK_SECONDS = 0.6;
 const BOARD_BACK_HOLD_SECONDS = 1.0;

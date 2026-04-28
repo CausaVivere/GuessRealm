@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import Image from "~/components/ui/smart-image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type CSSProperties } from "react";
 import { Button } from "~/components/ui/button";

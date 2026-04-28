@@ -8,7 +8,11 @@ import {
   publicProcedure,
 } from "~/server/api/trpc";
 import { db } from "~/server/db";
-import { cacheAnime, cacheAnimeCharacters } from "../utils/jikan";
+import {
+  cacheAnime,
+  cacheAnimeCharacters,
+  refreshAnimeCharacters,
+} from "../utils/jikan";
 
 const tokens = {
   igdb: null,
@@ -156,6 +160,159 @@ export const setRouter = createTRPCRouter({
         throw new TRPCError({
           message: "Error creating anime set.",
           code: "BAD_REQUEST",
+        });
+      }
+
+      return set;
+    }),
+  updateAnimeSet: protectedProcedure
+    .input(
+      z.object({
+        setId: z.string(),
+        name: z.string().min(1).max(45),
+        animeIds: z.array(z.number()).min(1),
+        characterIds: z.array(z.number()).min(24),
+        mostCommonAnimeId: z.number(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const existingSet = await ctx.db.animeGameset.findUnique({
+        where: { id: input.setId },
+        select: { img: true },
+      });
+
+      if (!existingSet) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Anime set not found.",
+        });
+      }
+
+      const img = await ctx.db.anime.findFirst({
+        where: { id: input.mostCommonAnimeId },
+        select: { image: true },
+      });
+
+      const updatedSet = await ctx.db.animeGameset.update({
+        where: { id: input.setId },
+        data: {
+          name: input.name,
+          img: img?.image ?? existingSet.img ?? null,
+          animes: { set: input.animeIds.map((id) => ({ id })) },
+          characters: { set: input.characterIds.map((id) => ({ id })) },
+        },
+      });
+
+      return updatedSet;
+    }),
+  refreshAnimeSetFromJikan: protectedProcedure
+    .input(z.object({ setId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const set = await ctx.db.animeGameset.findUnique({
+        where: { id: input.setId },
+        include: {
+          animes: { select: { id: true } },
+          characters: { select: { animeId: true } },
+        },
+      });
+
+      if (!set) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Anime set not found.",
+        });
+      }
+
+      const animeIds = new Set<number>([
+        ...set.animes.map((anime) => anime.id),
+        ...set.characters.map((character) => character.animeId),
+      ]);
+
+      for (const animeId of animeIds) {
+        await cacheAnime(String(animeId));
+        await refreshAnimeCharacters(animeId);
+      }
+
+      await ctx.db.animeGameset.update({
+        where: { id: input.setId },
+        data: { updatedAt: new Date() },
+      });
+
+      return { animeIds: Array.from(animeIds) };
+    }),
+  getAdminAnimeSets: protectedProcedure
+    .input(
+      z.object({
+        search: z.string().optional(),
+        limit: z.number().optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const data = await ctx.db.animeGameset.findMany({
+        where: {
+          OR: [
+            {
+              name: {
+                contains: input.search,
+                mode: "insensitive",
+              },
+            },
+            {
+              characters: {
+                some: {
+                  name: {
+                    contains: input.search,
+                    mode: "insensitive",
+                  },
+                },
+              },
+            },
+            {
+              animes: {
+                some: {
+                  titleJapanese: {
+                    contains: input.search,
+                    mode: "insensitive",
+                  },
+                },
+              },
+            },
+            {
+              animes: {
+                some: {
+                  titleEnglish: {
+                    contains: input.search,
+                    mode: "insensitive",
+                  },
+                },
+              },
+            },
+          ],
+        },
+        take: input.limit ?? 50,
+        orderBy: { updatedAt: "desc" },
+      });
+      return data;
+    }),
+  getAdminAnimeSet: protectedProcedure
+    .input(
+      z.object({
+        setId: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const set = await ctx.db.animeGameset.findUnique({
+        where: { id: input.setId },
+        include: {
+          characters: true,
+          animes: true,
+        },
+      });
+
+      if (!set) {
+        throw new TRPCError({
+          message: "Anime set not found.",
+          code: "NOT_FOUND",
         });
       }
 

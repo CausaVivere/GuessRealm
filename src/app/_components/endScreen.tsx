@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ChevronLeft, Crown, Swords } from "lucide-react";
-import Image from "next/image";
+import Image from "~/components/ui/smart-image";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties, HTMLAttributes } from "react";

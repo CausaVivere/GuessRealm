@@ -1,5 +1,5 @@
 import { Heart } from "lucide-react";
-import Image from "next/image";
+import Image from "~/components/ui/smart-image";
 import { cn } from "~/lib/utils";
 import type { AnimeCharacter } from "~/server/api/utils/jikan";
 

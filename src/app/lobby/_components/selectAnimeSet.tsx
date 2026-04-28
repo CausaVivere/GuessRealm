@@ -7,7 +7,7 @@ import Loading from "~/components/ui/loading";
 import { api } from "~/trpc/react";
 import { useParty } from "~/utils/PartyProvider";
 import { ChevronLeft } from "lucide-react";
-import Image from "next/image";
+import Image from "~/components/ui/smart-image";
 import { toast } from "sonner";
 import { ButtonGroup } from "~/components/ui/button-group";
 import { cn } from "~/lib/utils";

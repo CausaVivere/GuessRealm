@@ -197,6 +197,111 @@ export async function cacheAnimeCharacters(animeId: number) {
   }
 }
 
+export async function refreshAnimeCharacters(animeId: number) {
+  const response = await fetch(
+    `https://api.jikan.moe/v4/anime/${animeId}/characters`,
+    {
+      method: "GET",
+    },
+  );
+
+  if (!response.ok) {
+    console.error("Failed to fetch characters from Jikan:", response);
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "Failed to fetch characters",
+    });
+  }
+
+  try {
+    const characters = (await response.json()).data as CharacterObject[];
+
+    const characterUpserts = characters.map((char) => {
+      const image = char.character.images?.jpg?.image_url ?? null;
+      const updateData: Prisma.AnimeCharacterUpdateInput = {
+        animeId,
+        name: char.character.name,
+        url: char.character.url,
+        role: char.role,
+        favorites: char.favorites ?? 0,
+        ...(image ? { image } : {}),
+      };
+
+      return db.animeCharacter.upsert({
+        where: { id: char.character.mal_id },
+        update: updateData,
+        create: {
+          id: char.character.mal_id,
+          animeId,
+          name: char.character.name,
+          url: char.character.url,
+          image,
+          role: char.role,
+          favorites: char.favorites ?? 0,
+        },
+      });
+    });
+
+    const voiceActorUpserts = characters.flatMap((char) =>
+      char.voice_actors.map((va) => {
+        const image = va.person.images?.jpg?.image_url ?? null;
+        const updateData: Prisma.VoiceActorUpdateInput = {
+          name: va.person.name,
+          url: va.person.url,
+          ...(image ? { image } : {}),
+        };
+
+        return db.voiceActor.upsert({
+          where: { id: va.person.mal_id },
+          update: updateData,
+          create: {
+            id: va.person.mal_id,
+            url: va.person.url,
+            image,
+            name: va.person.name,
+            language: va.language,
+          },
+        });
+      }),
+    );
+
+    const upserts = [...characterUpserts, ...voiceActorUpserts];
+    if (upserts.length > 0) {
+      const batchSize = 20;
+
+      for (let i = 0; i < upserts.length; i += batchSize) {
+        await Promise.all(upserts.slice(i, i + batchSize));
+      }
+    }
+
+    const pairs = characters.flatMap((char) =>
+      char.voice_actors.map((va) => [char.character.mal_id, va.person.mal_id]),
+    );
+
+    if (pairs.length > 0) {
+      const values = pairs
+        .map((_, i) => `($${i * 2 + 1}, $${i * 2 + 2})`)
+        .join(", ");
+      await db.$executeRawUnsafe(
+        `INSERT INTO "_AnimeCharacterToVoiceActor" ("A", "B") VALUES ${values} ON CONFLICT DO NOTHING`,
+        ...pairs.flat(),
+      );
+    }
+
+    const data = await db.animeCharacter.findMany({
+      where: { animeId },
+    });
+
+    return data;
+  } catch (err) {
+    console.error("Failed to refresh anime characters:", err);
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "Failed to refresh anime characters",
+    });
+  }
+}
+
 export function formatAnime(anime: AnimeObject) {
   return {
     url: anime.url,
